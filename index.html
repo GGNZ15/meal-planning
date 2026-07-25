@@ -599,6 +599,32 @@
       flex-wrap: wrap;
     }
 
+    .header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .sync-status {
+      margin: 0.35rem 0 0;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .sync-status.ok { color: var(--ok); }
+    .sync-status.warn { color: var(--warn); }
+    .sync-status.err { color: var(--over); }
+
+    .setup-steps {
+      margin: 0 0 1rem;
+      padding-left: 1.2rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .setup-steps a { color: var(--accent); font-weight: 600; }
+
     .shop-scope {
       display: flex;
       flex-wrap: wrap;
@@ -707,7 +733,10 @@
           <h1>Meal Planner</h1>
           <p class="lede">Plan Day A and Day B side by side. Shared foods/recipes library, per-day progress against the same targets.</p>
         </div>
-        <button class="btn btn-primary" type="button" id="shopping-list-btn">Shopping list</button>
+        <div class="header-actions">
+          <button class="btn btn-ghost" type="button" id="sync-settings-btn">Sync</button>
+          <button class="btn btn-primary" type="button" id="shopping-list-btn">Shopping list</button>
+        </div>
       </div>
     </header>
 
@@ -804,6 +833,32 @@ Fibre 8g · Sugar 14g · Sodium 180mg"></textarea>
     </form>
   </dialog>
 
+  <dialog id="sync-dialog">
+    <div class="dialog-body">
+      <h3>Sync phone &amp; laptop</h3>
+      <p class="panel-sub">Uses a private GitHub Gist so both devices share the same plan. Your token stays in this browser only — it’s never uploaded into the meal plan file.</p>
+      <ol class="setup-steps">
+        <li>On GitHub, create a classic token with the <strong>gist</strong> scope: <a href="https://github.com/settings/tokens/new?scopes=gist&description=Meal%20Planner%20Sync" target="_blank" rel="noopener">Create token</a></li>
+        <li>Paste it below on this device, then tap <strong>Save &amp; sync</strong>.</li>
+        <li>On your other device, open this same site, paste the <em>same</em> token, and the same Gist ID (shown after the first sync).</li>
+      </ol>
+      <div class="form-grid">
+        <label class="field full">GitHub token
+          <input id="sync-token" type="password" autocomplete="off" placeholder="ghp_…" />
+        </label>
+        <label class="field full">Gist ID <span style="font-weight:500;text-transform:none;letter-spacing:0;">(leave blank on first device — we’ll create one)</span>
+          <input id="sync-gist-id" type="text" autocomplete="off" placeholder="e.g. a1b2c3d4…" />
+        </label>
+      </div>
+      <p class="sync-status" id="sync-status"></p>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" type="button" id="sync-now-btn">Sync now</button>
+        <button class="btn btn-ghost" type="button" id="close-sync">Close</button>
+        <button class="btn btn-primary" type="button" id="save-sync">Save &amp; sync</button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog id="shopping-dialog" class="shop-dialog">
     <div class="dialog-body">
       <h3>Shopping list</h3>
@@ -844,6 +899,8 @@ Fibre 8g · Sugar 14g · Sodium 180mg"></textarea>
 
   <script>
     const STORAGE_KEY = "meal-planner-v2";
+    const SYNC_KEY = "meal-planner-sync-v1";
+    const GIST_FILENAME = "meal-planner-state.json";
     const DAYS = [
       { id: "dayA", label: "Day A" },
       { id: "dayB", label: "Day B" },
@@ -1393,23 +1450,48 @@ Per 100g:
             dayA: Math.max(0, Number(parsed.shopRepeats?.dayA) || 1),
             dayB: Math.max(0, Number(parsed.shopRepeats?.dayB) || 1),
           },
+          updatedAt: parsed.updatedAt || new Date().toISOString(),
         };
       } catch {
         return defaultState();
       }
     }
 
-    function saveState() {
+    function loadSyncSettings() {
+      try {
+        return JSON.parse(localStorage.getItem(SYNC_KEY) || "{}") || {};
+      } catch {
+        return {};
+      }
+    }
+
+    function saveSyncSettings(settings) {
+      localStorage.setItem(SYNC_KEY, JSON.stringify(settings));
+      syncSettings = settings;
+    }
+
+    function touchUpdatedAt() {
+      state.updatedAt = new Date().toISOString();
+    }
+
+    function saveState(options = {}) {
+      if (!options.skipTouch) touchUpdatedAt();
+      else if (!state.updatedAt) touchUpdatedAt();
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (!options.skipCloud) scheduleCloudPush();
     }
 
     let state = loadState();
     if (!Array.isArray(state.shopChecked)) state.shopChecked = [];
     if (!state.shopRepeats) state.shopRepeats = { dayA: 1, dayB: 1 };
-    saveState(); // persist any newly merged seed recipes
+    if (!state.updatedAt) state.updatedAt = new Date().toISOString();
+    saveState({ skipCloud: true, skipTouch: true }); // persist any newly merged seed recipes
     let editingId = null;
     let importDraft = null;
     let shopScope = "both";
+    let syncSettings = loadSyncSettings();
+    let cloudPushTimer = null;
+    let syncing = false;
 
     const els = {
       days: document.getElementById("days"),
@@ -1443,7 +1525,167 @@ Per 100g:
       copyShop: document.getElementById("copy-shop"),
       clearShopChecks: document.getElementById("clear-shop-checks"),
       closeShop: document.getElementById("close-shop"),
+      syncSettingsBtn: document.getElementById("sync-settings-btn"),
+      syncDialog: document.getElementById("sync-dialog"),
+      syncToken: document.getElementById("sync-token"),
+      syncGistId: document.getElementById("sync-gist-id"),
+      syncStatus: document.getElementById("sync-status"),
+      syncNowBtn: document.getElementById("sync-now-btn"),
+      saveSync: document.getElementById("save-sync"),
+      closeSync: document.getElementById("close-sync"),
     };
+
+    function setSyncStatus(message, tone = "") {
+      els.syncStatus.textContent = message || "";
+      els.syncStatus.className = `sync-status ${tone}`.trim();
+    }
+
+    function cloudPayload() {
+      touchUpdatedAt();
+      return {
+        updatedAt: state.updatedAt,
+        data: state,
+      };
+    }
+
+    async function gistRequest(path, options = {}) {
+      const token = syncSettings.token;
+      if (!token) throw new Error("Add a GitHub token first.");
+      const res = await fetch(`https://api.github.com${path}`, {
+        ...options,
+        headers: {
+          Accept: "application/vnd.github+json",
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          ...(options.headers || {}),
+        },
+      });
+      const text = await res.text();
+      let body = null;
+      try { body = text ? JSON.parse(text) : null; } catch { body = text; }
+      if (!res.ok) {
+        const msg = body?.message || res.statusText || "GitHub request failed";
+        throw new Error(msg);
+      }
+      return body;
+    }
+
+    async function pushToCloud() {
+      if (!syncSettings.token) return;
+      const content = JSON.stringify(cloudPayload(), null, 2);
+      if (syncSettings.gistId) {
+        await gistRequest(`/gists/${syncSettings.gistId}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            files: { [GIST_FILENAME]: { content } },
+          }),
+        });
+      } else {
+        const created = await gistRequest("/gists", {
+          method: "POST",
+          body: JSON.stringify({
+            description: "Meal Planner sync (private)",
+            public: false,
+            files: { [GIST_FILENAME]: { content } },
+          }),
+        });
+        syncSettings = { ...syncSettings, gistId: created.id };
+        saveSyncSettings(syncSettings);
+        if (els.syncGistId) els.syncGistId.value = created.id;
+      }
+    }
+
+    async function pullFromCloud() {
+      if (!syncSettings.token || !syncSettings.gistId) return null;
+      const gist = await gistRequest(`/gists/${syncSettings.gistId}`);
+      const file = gist.files?.[GIST_FILENAME] || Object.values(gist.files || {})[0];
+      if (!file?.content) return null;
+      const parsed = JSON.parse(file.content);
+      return parsed?.data ? parsed : { updatedAt: parsed?.updatedAt, data: parsed };
+    }
+
+    function applyRemoteState(remote) {
+      if (!remote?.data) return false;
+      const remoteAt = Date.parse(remote.updatedAt || remote.data.updatedAt || 0);
+      const localAt = Date.parse(state.updatedAt || 0);
+      if (remoteAt && localAt && remoteAt <= localAt) return false;
+      const base = defaultState();
+      state = {
+        ...base,
+        ...remote.data,
+        targets: { ...base.targets, ...(remote.data.targets || {}) },
+        recipes: Array.isArray(remote.data.recipes) ? remote.data.recipes : base.recipes,
+        removedSeedIds: Array.isArray(remote.data.removedSeedIds) ? remote.data.removedSeedIds : [],
+        shopChecked: Array.isArray(remote.data.shopChecked) ? remote.data.shopChecked : [],
+        shopRepeats: {
+          dayA: Math.max(0, Number(remote.data.shopRepeats?.dayA) || 1),
+          dayB: Math.max(0, Number(remote.data.shopRepeats?.dayB) || 1),
+        },
+        days: {
+          dayA: normalizeDayPlan(remote.data.days?.dayA),
+          dayB: normalizeDayPlan(remote.data.days?.dayB),
+        },
+        updatedAt: remote.updatedAt || remote.data.updatedAt || new Date().toISOString(),
+      };
+      saveState({ skipCloud: true, skipTouch: true });
+      return true;
+    }
+
+    function scheduleCloudPush() {
+      if (!syncSettings.token) return;
+      clearTimeout(cloudPushTimer);
+      cloudPushTimer = setTimeout(() => {
+        pushToCloud().catch((err) => {
+          console.warn("Cloud sync push failed:", err);
+        });
+      }, 900);
+    }
+
+    async function syncNow({ preferPush = false } = {}) {
+      if (syncing) return;
+      if (!syncSettings.token) {
+        setSyncStatus("Add a GitHub token to enable sync.", "warn");
+        return;
+      }
+      syncing = true;
+      setSyncStatus("Syncing…");
+      try {
+        if (!syncSettings.gistId || preferPush) {
+          await pushToCloud();
+          setSyncStatus(`Synced. Gist ID: ${syncSettings.gistId}`, "ok");
+        } else {
+          const remote = await pullFromCloud();
+          const remoteAt = Date.parse(remote?.updatedAt || remote?.data?.updatedAt || 0);
+          const localAt = Date.parse(state.updatedAt || 0);
+          if (remote && remoteAt > localAt) {
+            const changed = applyRemoteState(remote);
+            if (changed) render();
+            setSyncStatus("Pulled latest plan from the cloud.", "ok");
+          } else {
+            await pushToCloud();
+            setSyncStatus("Pushed this device’s plan to the cloud.", "ok");
+          }
+        }
+      } catch (err) {
+        setSyncStatus(err.message || "Sync failed.", "err");
+      } finally {
+        syncing = false;
+      }
+    }
+
+    function openSyncDialog() {
+      els.syncToken.value = syncSettings.token || "";
+      els.syncGistId.value = syncSettings.gistId || "";
+      setSyncStatus(
+        syncSettings.gistId
+          ? `Connected. Gist ID: ${syncSettings.gistId}`
+          : syncSettings.token
+            ? "Token saved. Tap Save & sync to create your private Gist."
+            : "",
+        syncSettings.gistId ? "ok" : ""
+      );
+      els.syncDialog.showModal();
+    }
 
     function recipeById(id) {
       const needle = String(id || "");
@@ -2102,6 +2344,26 @@ Per 100g:
     els.addRecipe.addEventListener("click", () => openDialog());
     els.cancelRecipe.addEventListener("click", () => els.dialog.close());
 
+    els.syncSettingsBtn.addEventListener("click", openSyncDialog);
+    els.closeSync.addEventListener("click", () => els.syncDialog.close());
+    els.saveSync.addEventListener("click", async () => {
+      const token = els.syncToken.value.trim();
+      const gistId = els.syncGistId.value.trim();
+      if (!token) {
+        setSyncStatus("Paste your GitHub token first.", "warn");
+        return;
+      }
+      saveSyncSettings({ token, gistId });
+      await syncNow({ preferPush: !gistId });
+      els.syncGistId.value = syncSettings.gistId || "";
+    });
+    els.syncNowBtn.addEventListener("click", () => syncNow());
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible" && syncSettings.token && syncSettings.gistId) {
+        syncNow().catch(() => {});
+      }
+    });
+
     els.shoppingListBtn.addEventListener("click", openShoppingList);
     els.closeShop.addEventListener("click", () => els.shoppingDialog.close());
     els.shopScope.addEventListener("click", (e) => {
@@ -2331,6 +2593,9 @@ Per 100g:
     els.closeInstructions.addEventListener("click", () => els.instructionsDialog.close());
 
     render();
+    if (syncSettings.token && syncSettings.gistId) {
+      syncNow().catch(() => {});
+    }
   </script>
 </body>
 </html>
