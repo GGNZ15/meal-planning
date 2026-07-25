@@ -1,0 +1,2336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Meal Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #eef3ef;
+      --bg-deep: #dfe8e2;
+      --surface: rgba(255, 255, 255, 0.72);
+      --surface-solid: #f7faf8;
+      --ink: #1c2a22;
+      --muted: #5a6b61;
+      --line: rgba(28, 42, 34, 0.12);
+      --accent: #2f6a4a;
+      --accent-soft: #d7ebe0;
+      --warn: #b45309;
+      --over: #b42318;
+      --ok: #1f7a4d;
+      --shadow: 0 18px 40px rgba(28, 42, 34, 0.08);
+      --radius: 18px;
+      --font: "Manrope", sans-serif;
+      --display: "Fraunces", Georgia, serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 10% -10%, #cfe3d6 0%, transparent 55%),
+        radial-gradient(900px 500px at 100% 0%, #d9e4ef 0%, transparent 45%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232f6a4a' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+
+    .wrap {
+      position: relative;
+      width: min(1280px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 2rem 0 4rem;
+    }
+
+    header.app-header {
+      display: grid;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+      animation: rise 0.55s ease both;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--display);
+      font-size: clamp(2.2rem, 5vw, 3.4rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
+    }
+
+    .lede {
+      margin: 0;
+      max-width: 42rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.5;
+    }
+
+    .panel {
+      background: var(--surface);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.25rem;
+      animation: rise 0.6s ease both;
+    }
+
+    .panel h2 {
+      margin: 0 0 0.35rem;
+      font-family: var(--display);
+      font-size: 1.45rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .panel-sub {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .targets-panel {
+      margin-bottom: 1.25rem;
+    }
+
+    .targets {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0.65rem;
+    }
+
+    @media (max-width: 900px) {
+      .targets { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+      .targets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    .days {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      align-items: start;
+      margin-bottom: 1.25rem;
+    }
+
+    @media (max-width: 960px) {
+      .days { grid-template-columns: 1fr; }
+    }
+
+    .day-panel {
+      display: grid;
+      gap: 1.1rem;
+    }
+
+    .day-panel:nth-child(2) { animation-delay: 0.08s; }
+
+    .day-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 0.75rem;
+    }
+
+    .day-head h2 { margin: 0; }
+
+    label.field {
+      display: grid;
+      gap: 0.3rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+
+    input, select, button, textarea { font: inherit; }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--surface-solid);
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 0.65rem 0.75rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: color-mix(in srgb, var(--accent) 55%, white);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+
+    .progress-block {
+      border-top: 1px solid var(--line);
+      padding-top: 1rem;
+    }
+
+    .progress-block h3 {
+      margin: 0 0 0.75rem;
+      font-family: var(--display);
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+
+    .progress-list {
+      display: grid;
+      gap: 0.7rem;
+    }
+
+    .metric {
+      display: grid;
+      gap: 0.3rem;
+    }
+
+    .metric-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: baseline;
+      font-size: 0.88rem;
+    }
+
+    .metric-name { font-weight: 700; }
+    .metric-nums { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .metric-nums.over { color: var(--over); font-weight: 700; }
+    .metric-nums.near { color: var(--warn); font-weight: 600; }
+    .metric-nums.good { color: var(--ok); }
+
+    .bar {
+      height: 9px;
+      border-radius: 999px;
+      background: rgba(28, 42, 34, 0.08);
+      overflow: hidden;
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #3f8f66, var(--accent));
+      transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s;
+    }
+
+    .bar > span.warn {
+      background: linear-gradient(90deg, #d97706, #b45309);
+    }
+
+    .bar > span.over {
+      background: linear-gradient(90deg, #ef4444, #b42318);
+    }
+
+    .day-total {
+      margin-top: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slots {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .slot {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.55);
+      padding: 0.85rem;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .slot:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(28, 42, 34, 0.06);
+    }
+
+    .slot-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .slot-head h3 {
+      margin: 0;
+      font-family: var(--display);
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .slot-kcal {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .slot-items {
+      display: grid;
+      gap: 0.5rem;
+      margin-bottom: 0.65rem;
+      min-height: 0.5rem;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding: 0.25rem 0;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.5rem 0.6rem;
+      border-radius: 12px;
+      background: var(--surface-solid);
+      animation: fade-in 0.3s ease both;
+    }
+
+    .item-name {
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+
+    .item-meta {
+      color: var(--muted);
+      font-size: 0.74rem;
+      margin-top: 0.12rem;
+    }
+
+    .servings-ctrl {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      background: var(--bg);
+      border-radius: 999px;
+      padding: 0.12rem;
+    }
+
+    .servings-ctrl button {
+      width: 26px;
+      height: 26px;
+      border: 0;
+      border-radius: 999px;
+      background: white;
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .servings-ctrl input {
+      width: 2.75rem;
+      text-align: center;
+      border: 0;
+      background: transparent;
+      padding: 0.15rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: white;
+      color: var(--muted);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .icon-btn:hover {
+      color: var(--over);
+      border-color: color-mix(in srgb, var(--over) 35%, white);
+      background: #fff5f5;
+    }
+
+    .add-row {
+      display: grid;
+      grid-template-columns: 1fr 4.5rem auto;
+      gap: 0.45rem;
+    }
+
+    @media (max-width: 560px) {
+      .add-row { grid-template-columns: 1fr; }
+      .item { grid-template-columns: 1fr; }
+      .servings-ctrl { justify-self: start; }
+      .icon-btn { justify-self: end; }
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 0.65rem 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.2s, opacity 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn:active { transform: translateY(1px); }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover { background: #25563c; }
+    .btn-ghost {
+      background: transparent;
+      color: var(--accent);
+      border: 1px solid color-mix(in srgb, var(--accent) 35%, white);
+    }
+    .btn-ghost:hover { background: var(--accent-soft); }
+    .btn-danger {
+      background: #fff5f5;
+      color: var(--over);
+      border: 1px solid color-mix(in srgb, var(--over) 25%, white);
+    }
+
+    .recipes-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .recipes-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      background: var(--surface-solid);
+      color: var(--ink);
+      border-radius: 12px;
+      padding: 0.75rem;
+      outline: none;
+      line-height: 1.45;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea:focus {
+      border-color: color-mix(in srgb, var(--accent) 55%, white);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+    }
+
+    .import-preview {
+      margin: 0.85rem 0 0;
+      padding: 0.85rem;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.65);
+      display: none;
+    }
+
+    .import-preview.show { display: grid; gap: 0.55rem; }
+
+    .import-preview h4 {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .import-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .import-note.warn { color: var(--warn); }
+
+    .recipe-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.65rem;
+    }
+
+    .recipe-card {
+      display: grid;
+      gap: 0.35rem;
+      padding: 0.8rem 0.85rem;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .recipe-card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+      align-items: start;
+    }
+
+    .recipe-card h4 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .recipe-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      justify-content: flex-end;
+    }
+
+    .instructions-body {
+      margin: 0;
+      white-space: pre-wrap;
+      line-height: 1.55;
+      font-size: 0.98rem;
+      max-height: min(60vh, 420px);
+      overflow: auto;
+      padding: 0.85rem 1rem;
+      border-radius: 14px;
+      background: rgba(238, 243, 239, 0.7);
+      border: 1px solid var(--line);
+    }
+
+    .nutri-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .nutri-grid span {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      background: var(--bg);
+      padding: 0.2rem 0.45rem;
+      border-radius: 999px;
+    }
+
+    dialog {
+      border: 0;
+      border-radius: 20px;
+      padding: 0;
+      width: min(560px, calc(100% - 1.5rem));
+      box-shadow: 0 30px 80px rgba(28, 42, 34, 0.25);
+      background: var(--surface-solid);
+      color: var(--ink);
+    }
+
+    dialog::backdrop {
+      background: rgba(18, 28, 22, 0.45);
+      backdrop-filter: blur(3px);
+    }
+
+    .dialog-body { padding: 1.35rem; }
+
+    .dialog-body h3 {
+      margin: 0 0 0.25rem;
+      font-family: var(--display);
+      font-size: 1.5rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+
+    .form-grid .full { grid-column: 1 / -1; }
+
+    .dialog-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .shop-scope {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 0.85rem 0 0.75rem;
+    }
+
+    .shop-scope button[aria-pressed="true"] {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+
+    .shop-repeats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.65rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 520px) {
+      .shop-repeats { grid-template-columns: 1fr; }
+    }
+
+    .shop-repeats .field input {
+      max-width: 100%;
+    }
+
+    .shop-summary {
+      margin: 0 0 0.85rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .shop-list {
+      display: grid;
+      gap: 0.45rem;
+      max-height: min(55vh, 480px);
+      overflow: auto;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .shop-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.65rem;
+      align-items: start;
+      padding: 0.55rem 0.65rem;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .shop-item.done {
+      opacity: 0.55;
+    }
+
+    .shop-item.done .shop-label {
+      text-decoration: line-through;
+    }
+
+    .shop-item input {
+      width: auto;
+      margin-top: 0.2rem;
+    }
+
+    .shop-label {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .shop-meta {
+      color: var(--muted);
+      font-size: 0.78rem;
+      margin-top: 0.15rem;
+    }
+
+    .shop-empty {
+      color: var(--muted);
+      font-size: 0.95rem;
+      padding: 0.5rem 0 1rem;
+    }
+
+    dialog.shop-dialog {
+      width: min(640px, calc(100% - 1.5rem));
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="app-header">
+      <div class="header-row">
+        <div>
+          <h1>Meal Planner</h1>
+          <p class="lede">Plan Day A and Day B side by side. Shared foods/recipes library, per-day progress against the same targets.</p>
+        </div>
+        <button class="btn btn-primary" type="button" id="shopping-list-btn">Shopping list</button>
+      </div>
+    </header>
+
+    <section class="panel targets-panel">
+      <h2>Daily targets</h2>
+      <p class="panel-sub">These goals apply to both days.</p>
+      <div class="targets" id="targets"></div>
+    </section>
+
+    <div class="days" id="days"></div>
+
+    <section class="panel">
+      <div class="recipes-head">
+        <div>
+          <h2 style="margin:0;">Foods / Recipes</h2>
+          <p class="panel-sub" style="margin:0.25rem 0 0;">Shared across both days. Saved in this browser.</p>
+        </div>
+        <div class="recipes-actions">
+          <button class="btn btn-ghost" type="button" id="import-recipe">Import from text</button>
+          <button class="btn btn-primary" type="button" id="add-recipe">Add food / recipe</button>
+        </div>
+      </div>
+      <div class="recipe-list" id="recipe-list"></div>
+    </section>
+  </div>
+
+  <dialog id="import-dialog">
+    <div class="dialog-body">
+      <h3>Import from text</h3>
+      <p class="panel-sub">Paste an Instagram caption or recipe notes. We’ll pull out name, servings, and macros where we can — then you can review before saving.</p>
+      <label class="field">Caption / recipe text
+        <textarea id="import-text" placeholder="Example:
+High protein overnight oats
+
+Serves 1
+450 kcal
+Protein 32g | Carbs 48g | Fat 12g
+Fibre 8g · Sugar 14g · Sodium 180mg"></textarea>
+      </label>
+      <div class="import-preview" id="import-preview"></div>
+      <div class="dialog-actions" style="margin-top:1rem;">
+        <button class="btn btn-ghost" type="button" id="cancel-import">Cancel</button>
+        <button class="btn btn-ghost" type="button" id="parse-import">Parse</button>
+        <button class="btn btn-primary" type="button" id="use-import" disabled>Review &amp; edit</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="recipe-dialog">
+    <form class="dialog-body" id="recipe-form" method="dialog">
+      <h3 id="dialog-title">Add food / recipe</h3>
+      <p class="panel-sub">Nutrition values are for the base number of servings.</p>
+      <div class="form-grid">
+        <label class="field full">Name
+          <input name="name" required placeholder="e.g. Overnight oats" />
+        </label>
+        <label class="field">Base servings
+          <input name="baseServings" type="number" min="0.25" step="0.25" value="1" required />
+        </label>
+        <label class="field">Calories (kcal)
+          <input name="calories" type="number" min="0" step="1" value="0" required />
+        </label>
+        <label class="field">Protein (g)
+          <input name="protein" type="number" min="0" step="0.1" value="0" required />
+        </label>
+        <label class="field">Carbs (g)
+          <input name="carbs" type="number" min="0" step="0.1" value="0" required />
+        </label>
+        <label class="field">Fat (g)
+          <input name="fat" type="number" min="0" step="0.1" value="0" required />
+        </label>
+        <label class="field">Fibre (g)
+          <input name="fibre" type="number" min="0" step="0.1" value="0" required />
+        </label>
+        <label class="field">Sugar (g)
+          <input name="sugar" type="number" min="0" step="0.1" value="0" required />
+        </label>
+        <label class="field">Sodium (mg)
+          <input name="sodium" type="number" min="0" step="1" value="0" required />
+        </label>
+        <label class="field full">Shopping ingredients
+          <textarea name="ingredients" rows="4" placeholder="One item per line (used for the shopping list)&#10;e.g. 120g chicken breast&#10;70g soba noodles"></textarea>
+        </label>
+        <label class="field full">Instructions
+          <textarea name="instructions" rows="5" placeholder="Steps, tips…"></textarea>
+        </label>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" type="button" id="cancel-recipe">Cancel</button>
+        <button class="btn btn-danger" type="button" id="delete-recipe" hidden>Delete</button>
+        <button class="btn btn-primary" type="submit" id="save-recipe">Save</button>
+      </div>
+      <input type="hidden" name="id" value="" />
+    </form>
+  </dialog>
+
+  <dialog id="shopping-dialog" class="shop-dialog">
+    <div class="dialog-body">
+      <h3>Shopping list</h3>
+      <p class="panel-sub">Built from recipes on your plan. Set how many times you’ll run each day this week.</p>
+      <div class="shop-scope" id="shop-scope">
+        <button class="btn btn-ghost" type="button" data-shop-scope="both" aria-pressed="true">Both days</button>
+        <button class="btn btn-ghost" type="button" data-shop-scope="dayA" aria-pressed="false">Day A</button>
+        <button class="btn btn-ghost" type="button" data-shop-scope="dayB" aria-pressed="false">Day B</button>
+      </div>
+      <div class="shop-repeats">
+        <label class="field">Day A ×
+          <input id="shop-repeats-a" type="number" min="0" max="14" step="1" value="1" />
+        </label>
+        <label class="field">Day B ×
+          <input id="shop-repeats-b" type="number" min="0" max="14" step="1" value="1" />
+        </label>
+      </div>
+      <p class="shop-summary" id="shop-summary"></p>
+      <div id="shop-content"></div>
+      <div class="dialog-actions" style="margin-top:1rem;">
+        <button class="btn btn-ghost" type="button" id="copy-shop">Copy list</button>
+        <button class="btn btn-ghost" type="button" id="clear-shop-checks">Clear ticks</button>
+        <button class="btn btn-primary" type="button" id="close-shop">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="instructions-dialog">
+    <div class="dialog-body">
+      <h3 id="instructions-title">Instructions</h3>
+      <p class="panel-sub" id="instructions-sub" style="margin-bottom:0.85rem;"></p>
+      <pre class="instructions-body" id="instructions-body"></pre>
+      <div class="dialog-actions" style="margin-top:1rem;">
+        <button class="btn btn-primary" type="button" id="close-instructions">Close</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script>
+    const STORAGE_KEY = "meal-planner-v2";
+    const DAYS = [
+      { id: "dayA", label: "Day A" },
+      { id: "dayB", label: "Day B" },
+    ];
+    const SLOTS = [
+      { id: "breakfast", label: "Breakfast" },
+      { id: "morningSnack", label: "Morning Snack" },
+      { id: "lunch", label: "Lunch" },
+      { id: "afternoonSnack", label: "Afternoon Snack" },
+      { id: "dinner", label: "Dinner" },
+      { id: "dessert", label: "Dessert" },
+    ];
+    const NUTRIENTS = [
+      { key: "calories", label: "Calories", unit: "kcal", step: 1 },
+      { key: "protein", label: "Protein", unit: "g", step: 1 },
+      { key: "carbs", label: "Carbs", unit: "g", step: 1 },
+      { key: "fat", label: "Fat", unit: "g", step: 1 },
+      { key: "fibre", label: "Fibre", unit: "g", step: 0.5 },
+      { key: "sugar", label: "Sugar", unit: "g", step: 1 },
+      { key: "sodium", label: "Sodium", unit: "mg", step: 10 },
+    ];
+
+    function emptyDayPlan() {
+      return Object.fromEntries(SLOTS.map((s) => [s.id, []]));
+    }
+
+    // Stable IDs so seed recipes can be merged into existing localStorage libraries
+    const SEED_RECIPES = [
+      {
+        id: "seed-greek-yoghurt-bowl",
+        name: "Greek yoghurt bowl",
+        baseServings: 1,
+        calories: 320,
+        protein: 28,
+        carbs: 28,
+        fat: 10,
+        fibre: 4,
+        sugar: 18,
+        sodium: 90,
+        instructions: "1. Spoon Greek yoghurt into a bowl.\n2. Top with berries, honey, and a handful of granola.\n3. Add a sprinkle of seeds if you like.",
+      },
+      {
+        id: "seed-chicken-rice-bowl",
+        name: "Chicken rice bowl",
+        baseServings: 1,
+        calories: 540,
+        protein: 42,
+        carbs: 55,
+        fat: 14,
+        fibre: 5,
+        sugar: 4,
+        sodium: 680,
+        instructions: "1. Cook rice and season lightly.\n2. Pan-sear chicken until cooked through, then slice.\n3. Assemble with greens, chicken, rice, and your favourite sauce.",
+      },
+      {
+        id: "seed-apple-peanut-butter",
+        name: "Apple + peanut butter",
+        baseServings: 1,
+        calories: 210,
+        protein: 6,
+        carbs: 22,
+        fat: 12,
+        fibre: 4,
+        sugar: 16,
+        sodium: 80,
+        instructions: "1. Slice an apple.\n2. Serve with 1–2 tablespoons of peanut butter for dipping.",
+      },
+      {
+        id: "seed-hashbrown-egg-bake",
+        name: "Hashbrown egg bake",
+        baseServings: 1,
+        // Estimated from listed ingredients — tweak if your brands differ
+        calories: 490,
+        protein: 34,
+        carbs: 18,
+        fat: 30,
+        fibre: 2,
+        sugar: 3,
+        sodium: 1200,
+        instructions: `Ingredients (per serve):
+- 2 eggs
+- 1 hashbrown
+- 3 tbsp cottage cheese
+- 1/4 cup chopped ham
+- 1/4 cup shredded cheese
+- salt & pepper to taste
+- optional: spring onion to serve
+
+Instructions:
+1. Preheat oven to 180 degrees
+2. Lightly spray glass containers
+3. Add 2 eggs & cottage cheese to each container & stir
+4. Cut up 1 hashbrown & add to container
+5. Add chopped ham & cheese
+6. Season with salt & pepper
+7. Stir gently until combined
+8. Bake for 35 mins, until centre is cooked
+9. Cool, cover & refrigerate — ready to microwave for a quick high protein brekky during the week`,
+      },
+      {
+        id: "seed-protein-pancake-bowl",
+        name: "High-protein pancake bowl",
+        baseServings: 1,
+        calories: 380,
+        protein: 35,
+        carbs: 35,
+        fat: 13,
+        fibre: 1,
+        sugar: 6,
+        sodium: 350,
+        instructions: `380 kcals, P:35g, C:35g, F:13g (no toppings)
+
+Ingredients (for one bowl):
+• 1 egg
+• 50g (3 tbsp) Greek yoghurt
+• 100ml (1/3 cup) milk of choice
+• 30g protein powder
+• 30g (1/4 cup) self-raising flour
+
+Topping ideas:
+• Blueberries and white chocolate
+• Banana and a sprinkle of coconut sugar
+• Banana and chocolate chips
+• Almond butter, almond flakes and a sprinkle of icing sugar
+
+How to:
+1. Preheat your oven to 180°C.
+2. Whisk all the ingredients in your oven-safe Kilner containers.
+3. Add your toppings.
+4. Bake for 20–25 minutes until the centre is set.`,
+      },
+      {
+        id: "seed-baked-bean-bake",
+        name: "Baked bean bake",
+        baseServings: 1,
+        calories: 455,
+        protein: 31,
+        carbs: 37,
+        fat: 20,
+        fibre: 7,
+        sugar: 5,
+        sodium: 900,
+        instructions: `MACROS PER SERVE
+455 Calories | 31g Protein | 37g Carbs | 20g Fat | 7g Fibre
+
+INGREDIENTS (makes 1 serve)
+- 2 Eggs
+- 30g Bulla High Protein Cottage Cheese
+- 40g White Mushrooms, diced
+- 20g Spinach, chopped
+- 100g Heinz Baked Beans (no added sugar)
+- 1 McCain Hash brown
+- 20g Mozzarella Cheese, shredded
+- Salt, Pepper
+
+Method
+1. To an oven safe bowl add 2 whisked eggs, cottage cheese, spinach and mushroom. Combine all well. Season with salt and pepper.
+2. Add a layer of baked beans.
+3. Microwave 1 frozen hash brown for 1 minute until soft, crumble into pieces with a fork and mix in cheese. Spread this over the baked beans layer.
+4. Bake in the oven at 200°C fan forced for approx 20 minutes, then turn the grill on high for a final 5 minutes for the top to turn golden and crispy. (Watch closely so it doesn’t burn.)
+5. Enjoy!`,
+      },
+      {
+        id: "seed-anchor-protein-plus-vanilla",
+        name: "Anchor Protein+ Yoghurt Vanilla",
+        baseServings: 1,
+        // Per 100g (1 serving = 100g). Source: Anchor nutrition panel.
+        calories: 79,
+        protein: 7.4,
+        carbs: 8.3,
+        fat: 1.7,
+        fibre: 0,
+        sugar: 8,
+        sodium: 85,
+        instructions: `Anchor Protein+ Yoghurt Tub — Vanilla
+
+Serving size: 100g (1 serving in this planner = 100g)
+
+Per 100g:
+79 kcal | P 7.4g | C 8.3g | F 1.7g | Sugar 8.0g | Sodium 85mg
+
+Scale servings for larger portions (e.g. 1.8 servings ≈ 180g tub serve).`,
+      },
+      {
+        id: "seed-tip-top-mini-jelly-tip",
+        name: "Tip Top Mini Jelly Tip",
+        baseServings: 1,
+        // 1 mini stick (42g). Scaled from Tip Top per-100g panel.
+        calories: 104,
+        protein: 0.6,
+        carbs: 12.6,
+        fat: 5.6,
+        fibre: 0,
+        sugar: 12.1,
+        sodium: 15,
+        instructions: `Tip Top Jelly Tip Ice Cream on Stick — Minis
+
+Serving size: 1 mini stick (42g / 53ml)
+
+Per stick (approx):
+104 kcal | P 0.6g | C 12.6g | F 5.6g | Sugar 12.1g | Sodium 15mg
+
+Woolworths: tip-top-jelly-tip-ice-cream-on-stick-minis (stockcode 269709)`,
+      },
+      {
+        id: "seed-paddle-pop-banana",
+        name: "Paddle Pop Banana",
+        baseServings: 1,
+        // 1 ice block (63g). Streets NZ / Woolworths panel.
+        calories: 83,
+        protein: 1.1,
+        carbs: 14.4,
+        fat: 1.8,
+        fibre: 0,
+        sugar: 10.9,
+        sodium: 50,
+        instructions: `Streets Paddle Pop Ice Blocks — Banana
+
+Serving size: 1 ice block (63g)
+
+Per stick:
+83 kcal | P 1.1g | C 14.4g | F 1.8g | Sugar 10.9g | Sodium 50mg
+
+Woolworths: paddle-pop-ice-blocks-banana (stockcode 106304)`,
+      },
+      {
+        id: "seed-kapiti-salted-caramel-macadamia-mini",
+        name: "Kāpiti Mini Salted Caramel Macadamia",
+        baseServings: 1,
+        // 1 mini stick (45g). Kāpiti nutrition panel.
+        calories: 155,
+        protein: 1.5,
+        carbs: 14.3,
+        fat: 10.3,
+        fibre: 0,
+        sugar: 12.5,
+        sodium: 45,
+        instructions: `Kāpiti Marlborough Salted Caramel & Macadamia Minis
+
+Serving size: 1 mini stick (45g)
+
+Per stick:
+155 kcal | P 1.5g | C 14.3g | F 10.3g | Sugar 12.5g | Sodium 45mg
+
+Woolworths: kapiti-mini-ice-cream-on-stick-salted-caramel-macadamia (stockcode 493652)`,
+      },
+      {
+        id: "seed-chocolate-protein-shake",
+        name: "Chocolate protein shake",
+        baseServings: 1,
+        // 1 scoop R1 Protein Chocolate Fudge isolate + 1 cup (250ml) high-protein almond milk
+        calories: 206,
+        protein: 35.2,
+        carbs: 2.8,
+        fat: 6.2,
+        fibre: 1.7,
+        sugar: 1.6,
+        sodium: 152,
+        instructions: `Chocolate protein shake
+
+Ingredients (1 serve):
+- 1 scoop Rule 1 R1 Protein whey isolate — Chocolate Fudge
+  (~110 kcal, 25g protein, 2g carbs, 0.5g fat)
+- 1 cup (250ml) high-protein almond milk
+  (So Good High Protein Almond Milk used for macros — Anchor doesn’t sell a HP almond milk in NZ)
+  (~96 kcal, 10.2g protein, 0.8g carbs, 5.7g fat)
+
+Method:
+1. Add milk to a shaker or blender.
+2. Add 1 scoop protein powder.
+3. Shake or blend until smooth.
+
+Edit the recipe if your tub label or milk brand differs.`,
+      },
+      {
+        id: "seed-peanut-chicken-soba",
+        name: "Peanut chicken soba noodles",
+        baseServings: 1,
+        // Estimated meal-prep lunch serve
+        calories: 520,
+        protein: 42,
+        carbs: 48,
+        fat: 16,
+        fibre: 6,
+        sugar: 8,
+        sodium: 900,
+        instructions: `Peanut chicken soba (meal prep lunch)
+
+Ingredients (1 serve):
+- 70g dry soba noodles (or rice noodles) — cook, rinse, cool
+- 120–150g cooked chicken breast, shredded
+- ½ cup edamame (or frozen mixed veg), heated
+- Sauce: 1 tbsp peanut butter + 1 tbsp soy sauce + 1 tsp rice vinegar or lime juice + splash of water (optional chilli)
+- Spring onion + cucumber to serve (add fresh if you can)
+
+Method:
+1. Cook noodles, rinse under cold water, portion into containers.
+2. Add chicken and edamame/veg.
+3. Mix sauce and store in a small pot or jar (keeps noodles from going soft).
+4. When eating: tip sauce over, toss, add spring onion/cucumber.
+
+Keeps 3–4 days in the fridge. Macros are estimates — tweak if your portions differ.`,
+      },
+      {
+        id: "seed-soy-garlic-beef-noodles",
+        name: "Soy-garlic beef mince noodles",
+        baseServings: 1,
+        // Estimated meal-prep lunch serve
+        calories: 500,
+        protein: 38,
+        carbs: 45,
+        fat: 16,
+        fibre: 5,
+        sugar: 6,
+        sodium: 950,
+        instructions: `Soy-garlic beef mince noodles (meal prep lunch)
+
+Ingredients (1 serve):
+- 70g dry egg noodles or thin rice noodles
+- 120g lean beef mince (or turkey mince)
+- 2 cups shredded cabbage / bagged slaw
+- 1–2 garlic cloves, grated + 1 tsp grated ginger (or paste)
+- 1½ tbsp soy sauce (+ optional splash of sesame oil or chilli sauce)
+- Optional: 1 soft-boiled egg when serving (+~70 kcal, +6g protein)
+
+Method:
+1. Cook noodles, drain, toss with a tiny bit of oil so they don’t clump.
+2. Brown mince in a pan; add garlic and ginger for 1 minute.
+3. Stir in soy sauce, then cabbage/slaw until just wilted.
+4. Mix through noodles (or layer noodles under the mince mix in containers).
+
+Keeps 3–4 days. Reheat until steaming hot. Macros exclude the optional egg.`,
+      },
+      {
+        id: "seed-chicken-rice-japanese-slaw",
+        name: "Chicken, brown rice & Japanese slaw",
+        baseServings: 1,
+        // ~400 kcal: 100g cooked brown rice + 120g rotisserie chicken + 90g WW Japanese slaw
+        calories: 394,
+        protein: 37,
+        carbs: 30,
+        fat: 14,
+        fibre: 3,
+        sugar: 7,
+        sodium: 720,
+        instructions: `Chicken, brown rice & Japanese slaw (~400 kcal lunch)
+
+Ingredients (1 serve):
+- 100g cooked brown rice (~½ cup)
+- 120g shredded rotisserie chicken (skin removed if you want it leaner)
+- 90g Woolworths Fresh Salad Japanese Slaw (1 serve from the 450g bag)
+
+Method:
+1. Cook a batch of brown rice (or use microwave pouches) and portion 100g per container.
+2. Shred chicken and add 120g on top.
+3. Add 90g Japanese slaw (dressing is already in the bag — toss before portioning).
+4. Eat cold, or warm the rice + chicken and keep the slaw cold on the side.
+
+Meal prep tip: portion rice and chicken for the week; add slaw the day you eat it so it stays crunchy.
+
+Macros use the pack panel for slaw (80 kcal / 90g) plus typical values for rice and rotisserie chicken.`,
+      },
+      {
+        id: "seed-muscle-nation-protein-water",
+        name: "Muscle Nation Protein Water",
+        baseServings: 1,
+        // 1 scoop (30g). Typical panel — values vary slightly by flavour.
+        calories: 105,
+        protein: 23.5,
+        carbs: 2,
+        fat: 0,
+        fibre: 0,
+        sugar: 0.3,
+        sodium: 100,
+        instructions: `Muscle Nation Protein Water
+
+Serving size: 1 scoop (30g) mixed with 350–450ml cold water
+
+Typical per serve (varies by flavour):
+~105 kcal | P ~23–24g | C ~2g | F 0g | Sugar ~0.3g
+
+Collagen + whey isolate blend with electrolytes and BCAAs.
+
+How to:
+1. Add 1 scoop to a shaker.
+2. Add 350–450ml cold water.
+3. Shake, let foam settle 1–2 minutes if needed, drink.
+
+Source: Sprint Fit / Muscle Nation product info.
+https://www.sprintfit.co.nz/product/5257/muscle-nation-protein-water
+
+Edit if your flavour’s label differs.`,
+      },
+      {
+        id: "seed-tea-with-milk",
+        name: "Tea with milk",
+        baseServings: 1,
+        // Black/herbal tea + 1/4 cup (62.5ml) Anchor Dark Blue milk
+        calories: 39,
+        protein: 2.1,
+        carbs: 3,
+        fat: 2.1,
+        fibre: 0,
+        sugar: 3,
+        sodium: 25,
+        instructions: `Tea with milk
+
+Ingredients (1 serve):
+- 1 cup brewed tea (black, green, or herbal — ~0 kcal)
+- ¼ cup (62.5ml) Anchor Dark Blue (full cream) milk
+
+Method:
+1. Brew tea as usual.
+2. Add ¼ cup Dark Blue milk.
+
+Macros are from the milk only (Anchor Blue panel: 63 kcal / 100ml).
+Scale servings if you use more or less milk.`,
+      },
+      {
+        id: "seed-griffins-toffee-pops-minis",
+        name: "Griffin's Toffee Pops Minis",
+        baseServings: 1,
+        // Per serving 25g (5 servings per pack). 508 kJ ≈ 121 kcal.
+        calories: 121,
+        protein: 1.1,
+        carbs: 16.4,
+        fat: 5.7,
+        fibre: 0,
+        sugar: 11.3,
+        sodium: 64,
+        instructions: `Griffin's Biscuits Toffee Pops Minis
+
+Serving size: 25g (1 serving)
+Servings per pack: 5
+
+Per 25g serve:
+121 kcal (508 kJ) | P 1.1g | C 16.4g | F 5.7g | Sugar 11.3g | Sodium 64mg
+
+Per 100g:
+2030 kJ | P 4.3g | C 65.6g | F 22.7g | Sugar 45.3g | Sodium 257mg`,
+      },
+    ];
+
+    function mergeSeedRecipes(recipes, removedSeedIds = []) {
+      const next = Array.isArray(recipes) ? [...recipes] : [];
+      const removed = new Set(removedSeedIds || []);
+      const names = new Set(next.map((r) => String(r.name || "").trim().toLowerCase()));
+      const ids = new Set(next.map((r) => r.id));
+      for (const seed of SEED_RECIPES) {
+        if (removed.has(seed.id)) continue;
+        if (ids.has(seed.id) || names.has(seed.name.toLowerCase())) continue;
+        next.push({ ...seed });
+      }
+      return next;
+    }
+
+    function seedIdsForRecipe(recipe) {
+      if (!recipe) return [];
+      const ids = [];
+      if (SEED_RECIPES.some((s) => s.id === recipe.id)) ids.push(recipe.id);
+      const name = String(recipe.name || "").trim().toLowerCase();
+      for (const seed of SEED_RECIPES) {
+        if (seed.name.toLowerCase() === name && !ids.includes(seed.id)) ids.push(seed.id);
+      }
+      return ids;
+    }
+
+    const defaultState = () => ({
+      targets: {
+        calories: 2000,
+        protein: 120,
+        carbs: 220,
+        fat: 65,
+        fibre: 30,
+        sugar: 50,
+        sodium: 2300,
+      },
+      recipes: SEED_RECIPES.map((r) => ({
+        ...r,
+        ingredients: Array.isArray(r.ingredients) ? [...r.ingredients] : [],
+      })),
+      removedSeedIds: [],
+      shopChecked: [],
+      shopRepeats: { dayA: 1, dayB: 1 },
+      days: {
+        dayA: emptyDayPlan(),
+        dayB: emptyDayPlan(),
+      },
+    });
+
+    function normalizeDayPlan(plan) {
+      const next = emptyDayPlan();
+      if (!plan || typeof plan !== "object") return next;
+      for (const slot of SLOTS) {
+        if (Array.isArray(plan[slot.id])) next[slot.id] = plan[slot.id];
+      }
+      // Migrate older single-day snack slot if present
+      if (!next.morningSnack.length && Array.isArray(plan.snacks)) {
+        next.morningSnack = plan.snacks;
+      }
+      return next;
+    }
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("meal-planner-v1");
+        if (!raw) return defaultState();
+        const parsed = JSON.parse(raw);
+        const base = defaultState();
+        const removedSeedIds = Array.isArray(parsed.removedSeedIds)
+          ? parsed.removedSeedIds
+          : [];
+        const recipes = mergeSeedRecipes(
+          (Array.isArray(parsed.recipes) ? parsed.recipes : base.recipes).map((r) => ({
+            ...r,
+            instructions: typeof r.instructions === "string" ? r.instructions : "",
+            ingredients: Array.isArray(r.ingredients)
+              ? r.ingredients.map((x) => String(x).trim()).filter(Boolean)
+              : [],
+          })),
+          removedSeedIds
+        );
+
+        let days;
+        if (parsed.days?.dayA || parsed.days?.dayB) {
+          days = {
+            dayA: normalizeDayPlan(parsed.days.dayA),
+            dayB: normalizeDayPlan(parsed.days.dayB),
+          };
+        } else if (parsed.plan) {
+          // Migrate v1 single-day plan into Day A
+          days = {
+            dayA: normalizeDayPlan(parsed.plan),
+            dayB: emptyDayPlan(),
+          };
+        } else {
+          days = base.days;
+        }
+
+        return {
+          targets: { ...base.targets, ...(parsed.targets || {}) },
+          recipes,
+          removedSeedIds,
+          days,
+          shopChecked: Array.isArray(parsed.shopChecked) ? parsed.shopChecked : [],
+          shopRepeats: {
+            dayA: Math.max(0, Number(parsed.shopRepeats?.dayA) || 1),
+            dayB: Math.max(0, Number(parsed.shopRepeats?.dayB) || 1),
+          },
+        };
+      } catch {
+        return defaultState();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    let state = loadState();
+    if (!Array.isArray(state.shopChecked)) state.shopChecked = [];
+    if (!state.shopRepeats) state.shopRepeats = { dayA: 1, dayB: 1 };
+    saveState(); // persist any newly merged seed recipes
+    let editingId = null;
+    let importDraft = null;
+    let shopScope = "both";
+
+    const els = {
+      days: document.getElementById("days"),
+      targets: document.getElementById("targets"),
+      recipeList: document.getElementById("recipe-list"),
+      dialog: document.getElementById("recipe-dialog"),
+      form: document.getElementById("recipe-form"),
+      dialogTitle: document.getElementById("dialog-title"),
+      deleteBtn: document.getElementById("delete-recipe"),
+      addRecipe: document.getElementById("add-recipe"),
+      cancelRecipe: document.getElementById("cancel-recipe"),
+      importRecipe: document.getElementById("import-recipe"),
+      importDialog: document.getElementById("import-dialog"),
+      importText: document.getElementById("import-text"),
+      importPreview: document.getElementById("import-preview"),
+      cancelImport: document.getElementById("cancel-import"),
+      parseImport: document.getElementById("parse-import"),
+      useImport: document.getElementById("use-import"),
+      instructionsDialog: document.getElementById("instructions-dialog"),
+      instructionsTitle: document.getElementById("instructions-title"),
+      instructionsSub: document.getElementById("instructions-sub"),
+      instructionsBody: document.getElementById("instructions-body"),
+      closeInstructions: document.getElementById("close-instructions"),
+      shoppingListBtn: document.getElementById("shopping-list-btn"),
+      shoppingDialog: document.getElementById("shopping-dialog"),
+      shopScope: document.getElementById("shop-scope"),
+      shopContent: document.getElementById("shop-content"),
+      shopSummary: document.getElementById("shop-summary"),
+      shopRepeatsA: document.getElementById("shop-repeats-a"),
+      shopRepeatsB: document.getElementById("shop-repeats-b"),
+      copyShop: document.getElementById("copy-shop"),
+      clearShopChecks: document.getElementById("clear-shop-checks"),
+      closeShop: document.getElementById("close-shop"),
+    };
+
+    function recipeById(id) {
+      const needle = String(id || "");
+      return state.recipes.find((r) => String(r.id) === needle);
+    }
+
+    function scaleRecipe(recipe, servings) {
+      const factor = (Number(servings) || 1) / (Number(recipe.baseServings) || 1);
+      const out = {};
+      for (const n of NUTRIENTS) {
+        out[n.key] = (Number(recipe[n.key]) || 0) * factor;
+      }
+      return out;
+    }
+
+    function slotItems(dayId, slotId) {
+      const day = state.days[dayId];
+      if (!day) return null;
+      if (!Array.isArray(day[slotId])) day[slotId] = [];
+      return day[slotId];
+    }
+
+    function addRecipeToSlot(dayId, slotId, recipeId, servings) {
+      const recipe = recipeById(recipeId);
+      const items = slotItems(dayId, slotId);
+      if (!recipe || !items) return false;
+      items.push({
+        recipeId: recipe.id,
+        servings: Math.max(0.25, Number(servings) || 1),
+      });
+      return true;
+    }
+
+    function parseIngredientsField(text) {
+      return String(text || "")
+        .split("\n")
+        .map((l) => l.replace(/^[\s•\-\*]+/, "").trim())
+        .filter(Boolean);
+    }
+
+    function extractIngredientLines(recipe) {
+      if (!recipe) return [];
+      if (Array.isArray(recipe.ingredients) && recipe.ingredients.length) {
+        return recipe.ingredients.map((x) => String(x).trim()).filter(Boolean);
+      }
+
+      const text = String(recipe.instructions || "");
+      const block = text.match(
+        /(?:^|\n)\s*ingredients?\b[^\n]*\n([\s\S]*?)(?=\n\s*(?:method|how to|instructions?|macros?\b|per serve|serving size|keeps\b|meal prep|source:|edit if|topping ideas)\b|$)/i
+      );
+      if (block) {
+        const lines = block[1]
+          .split("\n")
+          .map((l) => l.replace(/^[\s•\-\*]+/, "").trim())
+          .filter((l) => l && !/^(optional toppings?|topping ideas)\b/i.test(l));
+        if (lines.length) return lines;
+      }
+
+      // Packaged / single-item recipes: buy the product itself
+      return [recipe.name];
+    }
+
+    function formatScaledNumber(n) {
+      const rounded = Math.round(n * 100) / 100;
+      if (Math.abs(rounded - 0.25) < 0.001) return "¼";
+      if (Math.abs(rounded - 0.5) < 0.001) return "½";
+      if (Math.abs(rounded - 0.75) < 0.001) return "¾";
+      if (Math.abs(rounded - 1.5) < 0.001) return "1½";
+      return Number.isInteger(rounded) ? String(rounded) : String(rounded);
+    }
+
+    function scaleIngredientLine(line, factor) {
+      if (!line || factor === 1) return line;
+      const unicode = { "¼": 0.25, "½": 0.5, "¾": 0.75, "⅓": 1 / 3, "⅔": 2 / 3, "1½": 1.5 };
+      const m = line.match(/^((?:\d+\s*)?(?:¼|½|¾|⅓|⅔|1½)|\d+(?:[./]\d+)?(?:\s*-\s*\d+(?:[./]\d+)?)?)\s*(.*)$/);
+      if (!m) return factor === 1 ? line : `${line} (×${formatScaledNumber(factor)})`;
+
+      const rawQty = m[1].trim();
+      const rest = m[2].trim();
+      if (rawQty.includes("-")) {
+        const [a, b] = rawQty.split("-").map((s) => s.trim());
+        const n1 = unicode[a] ?? Number(a);
+        const n2 = unicode[b] ?? Number(b);
+        if (!Number.isFinite(n1) || !Number.isFinite(n2)) {
+          return `${line} (×${formatScaledNumber(factor)})`;
+        }
+        return `${formatScaledNumber(n1 * factor)}-${formatScaledNumber(n2 * factor)} ${rest}`.trim();
+      }
+
+      let n = unicode[rawQty];
+      if (n == null) {
+        if (rawQty.includes("/")) {
+          const [num, den] = rawQty.split("/").map(Number);
+          n = num / den;
+        } else n = Number(rawQty);
+      }
+      if (!Number.isFinite(n)) return `${line} (×${formatScaledNumber(factor)})`;
+      return `${formatScaledNumber(n * factor)} ${rest}`.trim();
+    }
+
+    function ingredientKey(line) {
+      return String(line || "")
+        .toLowerCase()
+        .replace(/^((?:\d+\s*)?(?:¼|½|¾|⅓|⅔|1½)|\d+(?:[./]\d+)?(?:\s*-\s*\d+(?:[./]\d+)?)?)\s*/, "")
+        .replace(/\(×[^)]+\)\s*$/g, "")
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function shopDayRepeats(dayId) {
+      const n = Number(state.shopRepeats?.[dayId]);
+      return Number.isFinite(n) && n >= 0 ? n : 1;
+    }
+
+    function buildShoppingList(scope) {
+      const dayIds = scope === "both" ? ["dayA", "dayB"] : [scope];
+      const map = new Map();
+
+      for (const dayId of dayIds) {
+        const repeats = shopDayRepeats(dayId);
+        if (repeats <= 0) continue;
+        const dayLabel = DAYS.find((d) => d.id === dayId)?.label || dayId;
+        const dayTag = repeats === 1 ? dayLabel : `${dayLabel} ×${repeats}`;
+        for (const slot of SLOTS) {
+          for (const item of slotItems(dayId, slot.id) || []) {
+            const recipe = recipeById(item.recipeId);
+            if (!recipe) continue;
+            const factor =
+              ((Number(item.servings) || 1) / (Number(recipe.baseServings) || 1)) * repeats;
+            const lines = extractIngredientLines(recipe);
+            for (const line of lines) {
+              const scaled = scaleIngredientLine(line, factor);
+              const key = ingredientKey(line) || scaled.toLowerCase();
+              const existing = map.get(key);
+              if (existing) {
+                existing.factor += factor;
+                existing.sources.push(`${dayTag} · ${recipe.name}`);
+                existing.label = scaleIngredientLine(existing.baseLine, existing.factor);
+              } else {
+                map.set(key, {
+                  key,
+                  label: scaled,
+                  baseLine: line,
+                  factor,
+                  sources: [`${dayTag} · ${recipe.name}`],
+                });
+              }
+            }
+          }
+        }
+      }
+
+      return [...map.values()].sort((a, b) => a.label.localeCompare(b.label));
+    }
+
+    function syncShopRepeatInputs() {
+      els.shopRepeatsA.value = String(shopDayRepeats("dayA"));
+      els.shopRepeatsB.value = String(shopDayRepeats("dayB"));
+      const showA = shopScope === "both" || shopScope === "dayA";
+      const showB = shopScope === "both" || shopScope === "dayB";
+      els.shopRepeatsA.closest("label").hidden = !showA;
+      els.shopRepeatsB.closest("label").hidden = !showB;
+    }
+
+    function renderShopSummary() {
+      const a = shopScope === "dayB" ? 0 : shopDayRepeats("dayA");
+      const b = shopScope === "dayA" ? 0 : shopDayRepeats("dayB");
+      const parts = [];
+      if (a > 0) parts.push(`${a}× Day A`);
+      if (b > 0) parts.push(`${b}× Day B`);
+      const total = a + b;
+      els.shopSummary.textContent = parts.length
+        ? `Shopping for ${parts.join(" + ")} (${total} day${total === 1 ? "" : "s"}).`
+        : "Set at least one day above 0 to build a list.";
+    }
+
+    function renderShoppingList() {
+      syncShopRepeatInputs();
+      renderShopSummary();
+      const items = buildShoppingList(shopScope);
+      const checked = new Set(state.shopChecked || []);
+
+      if (!items.length) {
+        els.shopContent.innerHTML = `<p class="shop-empty">No recipes on this plan yet — or day repeats are set to 0. Add meals or bump the day counts.</p>`;
+        return;
+      }
+
+      els.shopContent.innerHTML = `
+        <ul class="shop-list">
+          ${items.map((item) => {
+            const done = checked.has(item.key);
+            const sources = [...new Set(item.sources)].join(" · ");
+            return `
+              <li class="shop-item ${done ? "done" : ""}">
+                <input type="checkbox" data-shop-key="${escapeHtml(item.key)}" ${done ? "checked" : ""} aria-label="Got ${escapeHtml(item.label)}" />
+                <div>
+                  <div class="shop-label">${escapeHtml(item.label)}</div>
+                  <div class="shop-meta">${escapeHtml(sources)}</div>
+                </div>
+              </li>
+            `;
+          }).join("")}
+        </ul>
+      `;
+    }
+
+    function openShoppingList() {
+      shopScope = "both";
+      for (const btn of els.shopScope.querySelectorAll("[data-shop-scope]")) {
+        btn.setAttribute("aria-pressed", btn.dataset.shopScope === shopScope ? "true" : "false");
+      }
+      renderShoppingList();
+      els.shoppingDialog.showModal();
+    }
+
+    function shoppingListPlainText() {
+      return buildShoppingList(shopScope)
+        .map((item) => {
+          const mark = (state.shopChecked || []).includes(item.key) ? "[x]" : "[ ]";
+          return `${mark} ${item.label}`;
+        })
+        .join("\n");
+    }
+
+    function dayTotals(dayId) {
+      const totals = Object.fromEntries(NUTRIENTS.map((n) => [n.key, 0]));
+      for (const slot of SLOTS) {
+        const items = slotItems(dayId, slot.id) || [];
+        for (const item of items) {
+          const recipe = recipeById(item.recipeId);
+          if (!recipe) continue;
+          const scaled = scaleRecipe(recipe, item.servings);
+          for (const n of NUTRIENTS) totals[n.key] += scaled[n.key];
+        }
+      }
+      return totals;
+    }
+
+    function slotCalories(dayId, slotId) {
+      let kcal = 0;
+      for (const item of slotItems(dayId, slotId) || []) {
+        const recipe = recipeById(item.recipeId);
+        if (!recipe) continue;
+        kcal += scaleRecipe(recipe, item.servings).calories;
+      }
+      return kcal;
+    }
+
+    function fmt(n, digits = 0) {
+      const v = Number(n) || 0;
+      return v.toLocaleString(undefined, {
+        maximumFractionDigits: digits,
+        minimumFractionDigits: digits,
+      });
+    }
+
+    function progressTone(pct) {
+      if (pct > 100) return "over";
+      if (pct >= 90) return "near";
+      if (pct >= 70) return "good";
+      return "";
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function key(dayId, slotId, index) {
+      return `${dayId}|${slotId}|${index}`;
+    }
+
+    function parseKey(value) {
+      const [dayId, slotId, index] = String(value || "").split("|");
+      return { dayId, slotId, index: Number(index) };
+    }
+
+    function renderTargets() {
+      els.targets.innerHTML = NUTRIENTS.map((n) => `
+        <label class="field">${n.label}
+          <input data-target="${n.key}" type="number" min="0" step="${n.step}" value="${state.targets[n.key]}" />
+        </label>
+      `).join("");
+    }
+
+    function progressHtml(dayId) {
+      const totals = dayTotals(dayId);
+      const metrics = NUTRIENTS.map((n) => {
+        const target = Number(state.targets[n.key]) || 0;
+        const value = totals[n.key];
+        const pct = target > 0 ? (value / target) * 100 : 0;
+        const tone = progressTone(pct);
+        const digits = n.key === "calories" || n.key === "sodium" ? 0 : 1;
+        return `
+          <div class="metric">
+            <div class="metric-top">
+              <span class="metric-name">${n.label}</span>
+              <span class="metric-nums ${tone}">${fmt(value, digits)} / ${fmt(target, digits)} ${n.unit}</span>
+            </div>
+            <div class="bar" aria-hidden="true"><span class="${tone === "over" ? "over" : tone === "near" ? "warn" : ""}" style="width:${Math.min(pct, 100)}%"></span></div>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div class="progress-block">
+          <h3>Daily progress</h3>
+          <div class="progress-list">${metrics}</div>
+          <div class="day-total">
+            <span class="chip">${fmt(totals.calories)} kcal</span>
+            <span class="chip">P ${fmt(totals.protein, 1)}g</span>
+            <span class="chip">C ${fmt(totals.carbs, 1)}g</span>
+            <span class="chip">F ${fmt(totals.fat, 1)}g</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function slotHtml(dayId, slot) {
+      const items = slotItems(dayId, slot.id) || [];
+      const options = state.recipes
+        .map((r) => `<option value="${escapeHtml(String(r.id))}">${escapeHtml(r.name)}</option>`)
+        .join("");
+      const placeholder = items.length ? "Add another food / recipe…" : "Choose a food / recipe…";
+
+      const list = items.length
+        ? items.map((item, index) => {
+            const recipe = recipeById(item.recipeId);
+            const k = key(dayId, slot.id, index);
+            if (!recipe) {
+              return `<div class="item"><div class="item-name">Missing recipe</div><div></div>
+                <button class="icon-btn" type="button" data-remove="${k}" aria-label="Remove">×</button></div>`;
+            }
+            const scaled = scaleRecipe(recipe, item.servings);
+            return `
+              <div class="item">
+                <div>
+                  <div class="item-name">${escapeHtml(recipe.name)}</div>
+                  <div class="item-meta">${fmt(scaled.calories)} kcal · P ${fmt(scaled.protein, 1)} · C ${fmt(scaled.carbs, 1)} · F ${fmt(scaled.fat, 1)}</div>
+                </div>
+                <div class="servings-ctrl" title="Servings">
+                  <button type="button" data-serv-dec="${k}" aria-label="Fewer servings">−</button>
+                  <input data-servings="${k}" type="number" min="0.25" step="0.25" value="${item.servings}" />
+                  <button type="button" data-serv-inc="${k}" aria-label="More servings">+</button>
+                </div>
+                <button class="icon-btn" type="button" data-remove="${k}" aria-label="Remove">×</button>
+              </div>
+            `;
+          }).join("")
+        : `<div class="empty">Nothing planned yet — add as many recipes as you like.</div>`;
+
+      const countLabel = items.length
+        ? `${items.length} item${items.length === 1 ? "" : "s"} · `
+        : "";
+
+      return `
+        <article class="slot">
+          <div class="slot-head">
+            <h3>${slot.label}</h3>
+            <div class="slot-kcal">${countLabel}${fmt(slotCalories(dayId, slot.id))} kcal</div>
+          </div>
+          <div class="slot-items">${list}</div>
+          <div class="add-row">
+            <select data-add-select data-day="${dayId}" data-slot="${slot.id}" ${state.recipes.length ? "" : "disabled"}>
+              ${state.recipes.length ? `<option value="">${placeholder}</option>${options}` : `<option value="">Add a food / recipe first</option>`}
+            </select>
+            <input data-add-servings data-day="${dayId}" data-slot="${slot.id}" type="number" min="0.25" step="0.25" value="1" aria-label="Servings to add" title="Servings" />
+            <button class="btn btn-primary" type="button" data-add data-day="${dayId}" data-slot="${slot.id}">Add</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderDays() {
+      els.days.innerHTML = DAYS.map((day) => `
+        <section class="panel day-panel" data-day="${day.id}">
+          <div class="day-head">
+            <div>
+              <h2>${day.label}</h2>
+              <p class="panel-sub" style="margin-bottom:0;">Each slot can hold multiple recipes. Servings scale the nutrition.</p>
+            </div>
+            <div class="toolbar">
+              <button class="btn btn-ghost" type="button" data-clear-day="${day.id}">Clear</button>
+            </div>
+          </div>
+          <div class="slots">
+            ${SLOTS.map((slot) => slotHtml(day.id, slot)).join("")}
+          </div>
+          ${progressHtml(day.id)}
+        </section>
+      `).join("");
+    }
+
+    function renderRecipes() {
+      if (!state.recipes.length) {
+        els.recipeList.innerHTML = `<div class="empty">No foods / recipes yet. Add one to get started.</div>`;
+        return;
+      }
+      els.recipeList.innerHTML = state.recipes.map((r) => `
+        <article class="recipe-card">
+          <div class="recipe-card-top">
+            <div>
+              <h4>${escapeHtml(r.name)}</h4>
+              <div class="item-meta">Per ${fmt(r.baseServings, 2)} serving${r.baseServings === 1 ? "" : "s"}</div>
+            </div>
+            <div class="recipe-actions">
+              <button class="btn btn-ghost" type="button" data-instructions="${r.id}">Instructions</button>
+              <button class="btn btn-ghost" type="button" data-edit="${r.id}">Edit</button>
+            </div>
+          </div>
+          <div class="nutri-grid">
+            <span>${fmt(r.calories)} kcal</span>
+            <span>P ${fmt(r.protein, 1)}g</span>
+            <span>C ${fmt(r.carbs, 1)}g</span>
+            <span>F ${fmt(r.fat, 1)}g</span>
+            <span>Fi ${fmt(r.fibre, 1)}g</span>
+            <span>Su ${fmt(r.sugar, 1)}g</span>
+            <span>Na ${fmt(r.sodium)}mg</span>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function openInstructions(recipe) {
+      if (!recipe) return;
+      const text = String(recipe.instructions || "").trim();
+      els.instructionsTitle.textContent = recipe.name || "Instructions";
+      els.instructionsSub.textContent = text
+        ? "How to make it"
+        : "No instructions saved yet — edit the recipe to add some.";
+      els.instructionsBody.textContent = text || "Add steps, ingredients, or tips in Edit.";
+      els.instructionsDialog.showModal();
+    }
+
+    function render() {
+      renderTargets();
+      renderDays();
+      renderRecipes();
+    }
+
+    function firstNumber(match) {
+      if (!match) return null;
+      const n = Number(String(match[1]).replace(",", "."));
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function parseLabeledNumber(text, labels) {
+      const label = labels.join("|");
+      const patterns = [
+        new RegExp(`(?:${label})\\s*[:=\\-]?\\s*(\\d+(?:[.,]\\d+)?)`, "i"),
+        new RegExp(`(\\d+(?:[.,]\\d+)?)\\s*(?:g|mg|grams?)?\\s*(?:${label})\\b`, "i"),
+      ];
+      for (const re of patterns) {
+        const n = firstNumber(text.match(re));
+        if (n != null) return n;
+      }
+      return null;
+    }
+
+    function parseRecipeFromText(raw) {
+      const text = String(raw || "").replace(/\r/g, "").trim();
+      const found = [];
+      const missing = [];
+      const recipe = {
+        name: "",
+        baseServings: 1,
+        calories: 0,
+        protein: 0,
+        carbs: 0,
+        fat: 0,
+        fibre: 0,
+        sugar: 0,
+        sodium: 0,
+        instructions: "",
+      };
+
+      if (!text) {
+        return { recipe, found, missing: ["Paste some text first"], ok: false };
+      }
+
+      const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
+      const skipName = /^(ingredients?|method|directions?|instructions?|macros?|nutrition|nutritional\s+info|per\s+serving|serves?\b|makes?\b|#)/i;
+      const nameLine = lines.find((l) => !skipName.test(l) && !/^\d/.test(l) && l.length > 2) || lines[0] || "";
+      recipe.name = nameLine
+        .replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\s*•\-–—|]+/gu, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 80);
+
+      if (recipe.name) found.push("name");
+      else missing.push("name");
+
+      const servings =
+        firstNumber(text.match(/(?:serves?|makes?|yield)\s*[:=]?\s*(\d+(?:[.,]\d+)?)/i)) ??
+        firstNumber(text.match(/(\d+(?:[.,]\d+)?)\s*(?:servings?|serves?|portions?)\b/i));
+      if (servings != null && servings > 0) {
+        recipe.baseServings = servings;
+        found.push("base servings");
+      }
+
+      const calories =
+        firstNumber(text.match(/(\d+(?:[.,]\d+)?)\s*(?:k?cal(?:ories)?|cals?)\b/i)) ??
+        parseLabeledNumber(text, ["calories?", "kcals?", "energy"]);
+      if (calories != null) {
+        recipe.calories = Math.round(calories);
+        found.push("calories");
+      } else missing.push("calories");
+
+      const protein =
+        firstNumber(text.match(/(?:^|[|\u2022•,\s])[Pp]\s*[:=]?\s*(\d+(?:[.,]\d+)?)\s*g?\b/m)) ??
+        parseLabeledNumber(text, ["proteins?", "protéines?", "prots?"]);
+      if (protein != null) {
+        recipe.protein = protein;
+        found.push("protein");
+      } else missing.push("protein");
+
+      const carbs =
+        firstNumber(text.match(/(?:^|[|\u2022•,\s])(?:[Cc]|CHO)\s*[:=]?\s*(\d+(?:[.,]\d+)?)\s*g?\b/m)) ??
+        parseLabeledNumber(text, ["carbohydrates?", "carbs?", "carb"]);
+      if (carbs != null) {
+        recipe.carbs = carbs;
+        found.push("carbs");
+      } else missing.push("carbs");
+
+      const fat =
+        firstNumber(text.match(/(?:^|[|\u2022•,\s])[Ff]\s*[:=]?\s*(\d+(?:[.,]\d+)?)\s*g?\b/m)) ??
+        parseLabeledNumber(text, ["fats?", "lipids?", "lipid"]);
+      if (fat != null) {
+        recipe.fat = fat;
+        found.push("fat");
+      } else missing.push("fat");
+
+      const fibre = parseLabeledNumber(text, ["fibres?", "fibers?", "dietary\\s+fibres?", "dietary\\s+fibers?"]);
+      if (fibre != null) {
+        recipe.fibre = fibre;
+        found.push("fibre");
+      } else missing.push("fibre");
+
+      const sugar = parseLabeledNumber(text, ["sugars?", "sucre"]);
+      if (sugar != null) {
+        recipe.sugar = sugar;
+        found.push("sugar");
+      } else missing.push("sugar");
+
+      const sodium =
+        firstNumber(text.match(/(?:sodium|na)\s*[:=]?\s*(\d+(?:[.,]\d+)?)\s*mg\b/i)) ??
+        firstNumber(text.match(/(\d+(?:[.,]\d+)?)\s*mg\s*(?:sodium|na)\b/i)) ??
+        parseLabeledNumber(text, ["sodium"]);
+      if (sodium != null) {
+        recipe.sodium = Math.round(sodium);
+        found.push("sodium");
+      } else missing.push("sodium");
+
+      // Compact macros line: 30p / 40c / 15f
+      const compact = text.match(/(\d+(?:[.,]\d+)?)\s*[pP]\s*[\/|]\s*(\d+(?:[.,]\d+)?)\s*[cC]\s*[\/|]\s*(\d+(?:[.,]\d+)?)\s*[fF]\b/);
+      if (compact) {
+        const applyCompact = (key, value) => {
+          if (found.includes(key)) return;
+          recipe[key] = value;
+          found.push(key);
+          const idx = missing.indexOf(key);
+          if (idx >= 0) missing.splice(idx, 1);
+        };
+        applyCompact("protein", Number(compact[1].replace(",", ".")));
+        applyCompact("carbs", Number(compact[2].replace(",", ".")));
+        applyCompact("fat", Number(compact[3].replace(",", ".")));
+      }
+
+      const methodMatch = text.match(/(?:^|\n)\s*(?:method|directions?|instructions?|how\s+to(?:\s+make)?|steps?)\s*:?\s*\n([\s\S]+)$/i);
+      if (methodMatch) {
+        recipe.instructions = methodMatch[1].trim();
+        found.push("instructions");
+      } else if (text.length > 40) {
+        // Keep the full caption as editable instructions when no clear method block exists
+        recipe.instructions = text;
+        found.push("instructions");
+      } else {
+        missing.push("instructions");
+      }
+
+      const ok = found.includes("name") || found.some((f) => ["calories", "protein", "carbs", "fat"].includes(f));
+      return { recipe, found, missing, ok };
+    }
+
+    function renderImportPreview(result) {
+      if (!result) {
+        els.importPreview.classList.remove("show");
+        els.importPreview.innerHTML = "";
+        els.useImport.disabled = true;
+        return;
+      }
+
+      const { recipe, found, missing, ok } = result;
+      const chips = [
+        `${fmt(recipe.calories)} kcal`,
+        `P ${fmt(recipe.protein, 1)}g`,
+        `C ${fmt(recipe.carbs, 1)}g`,
+        `F ${fmt(recipe.fat, 1)}g`,
+        `Fi ${fmt(recipe.fibre, 1)}g`,
+        `Su ${fmt(recipe.sugar, 1)}g`,
+        `Na ${fmt(recipe.sodium)}mg`,
+      ].map((c) => `<span class="chip">${c}</span>`).join("");
+
+      els.importPreview.classList.add("show");
+      els.importPreview.innerHTML = `
+        <h4>${escapeHtml(recipe.name || "Untitled recipe")}</h4>
+        <div class="item-meta">Base servings: ${fmt(recipe.baseServings, 2)}</div>
+        <div class="day-total" style="margin-top:0;">${chips}</div>
+        <p class="import-note">Found: ${found.length ? found.join(", ") : "nothing yet"}.</p>
+        <p class="import-note ${missing.length ? "warn" : ""}">${
+          missing.length
+            ? `Still missing or unclear: ${missing.join(", ")}. You can fill these in on the next screen.`
+            : "Looks complete — review the numbers, then save."
+        }</p>
+      `;
+      els.useImport.disabled = !ok;
+    }
+
+    function openImportDialog() {
+      importDraft = null;
+      els.importText.value = "";
+      renderImportPreview(null);
+      els.importDialog.showModal();
+      els.importText.focus();
+    }
+
+    function openDialog(recipe = null, options = {}) {
+      editingId = recipe?.id || null;
+      const imported = Boolean(options.imported);
+      els.dialogTitle.textContent = recipe?.id
+        ? "Edit food / recipe"
+        : imported
+          ? "Review imported food / recipe"
+          : "Add food / recipe";
+      els.deleteBtn.hidden = !recipe?.id;
+      const form = els.form;
+      form.name.value = recipe?.name || "";
+      form.baseServings.value = recipe?.baseServings ?? 1;
+      const ingredients = Array.isArray(recipe?.ingredients) && recipe.ingredients.length
+        ? recipe.ingredients
+        : extractIngredientLines(recipe || {}).filter((l) => l !== recipe?.name);
+      form.ingredients.value = ingredients.join("\n");
+      form.instructions.value = recipe?.instructions || "";
+      for (const n of NUTRIENTS) {
+        form[n.key].value = recipe?.[n.key] ?? 0;
+      }
+      form.id.value = recipe?.id || "";
+      els.dialog.showModal();
+      form.name.focus();
+    }
+
+    els.addRecipe.addEventListener("click", () => openDialog());
+    els.cancelRecipe.addEventListener("click", () => els.dialog.close());
+
+    els.shoppingListBtn.addEventListener("click", openShoppingList);
+    els.closeShop.addEventListener("click", () => els.shoppingDialog.close());
+    els.shopScope.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-shop-scope]");
+      if (!btn) return;
+      shopScope = btn.dataset.shopScope;
+      for (const b of els.shopScope.querySelectorAll("[data-shop-scope]")) {
+        b.setAttribute("aria-pressed", b.dataset.shopScope === shopScope ? "true" : "false");
+      }
+      renderShoppingList();
+    });
+    function onShopRepeatsChange() {
+      state.shopRepeats = {
+        dayA: Math.max(0, Math.min(14, Number(els.shopRepeatsA.value) || 0)),
+        dayB: Math.max(0, Math.min(14, Number(els.shopRepeatsB.value) || 0)),
+      };
+      saveState();
+      renderShoppingList();
+    }
+    els.shopRepeatsA.addEventListener("change", onShopRepeatsChange);
+    els.shopRepeatsB.addEventListener("change", onShopRepeatsChange);
+    els.shopRepeatsA.addEventListener("input", onShopRepeatsChange);
+    els.shopRepeatsB.addEventListener("input", onShopRepeatsChange);
+    els.shopContent.addEventListener("change", (e) => {
+      const box = e.target.closest("[data-shop-key]");
+      if (!box) return;
+      const key = box.dataset.shopKey;
+      if (!Array.isArray(state.shopChecked)) state.shopChecked = [];
+      if (box.checked) {
+        if (!state.shopChecked.includes(key)) state.shopChecked.push(key);
+      } else {
+        state.shopChecked = state.shopChecked.filter((k) => k !== key);
+      }
+      saveState();
+      renderShoppingList();
+    });
+    els.clearShopChecks.addEventListener("click", () => {
+      state.shopChecked = [];
+      saveState();
+      renderShoppingList();
+    });
+    els.copyShop.addEventListener("click", async () => {
+      const text = shoppingListPlainText();
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        els.copyShop.textContent = "Copied!";
+        setTimeout(() => { els.copyShop.textContent = "Copy list"; }, 1200);
+      } catch {
+        prompt("Copy this list:", text);
+      }
+    });
+
+    els.importRecipe.addEventListener("click", openImportDialog);
+    els.cancelImport.addEventListener("click", () => els.importDialog.close());
+    els.parseImport.addEventListener("click", () => {
+      const result = parseRecipeFromText(els.importText.value);
+      importDraft = result.ok ? result.recipe : null;
+      renderImportPreview(result);
+    });
+    els.useImport.addEventListener("click", () => {
+      if (!importDraft) return;
+      els.importDialog.close();
+      openDialog({ ...importDraft }, { imported: true });
+    });
+    els.importText.addEventListener("input", () => {
+      // Live parse once there's enough text; keep the button path as the explicit control
+      if (els.importText.value.trim().length < 12) {
+        importDraft = null;
+        renderImportPreview(null);
+        return;
+      }
+      const result = parseRecipeFromText(els.importText.value);
+      importDraft = result.ok ? result.recipe : null;
+      renderImportPreview(result);
+    });
+
+    els.deleteBtn.addEventListener("click", () => {
+      if (!editingId) return;
+      if (!confirm("Delete this recipe? It will also be removed from Day A and Day B.")) return;
+      const doomed = recipeById(editingId);
+      if (!Array.isArray(state.removedSeedIds)) state.removedSeedIds = [];
+      for (const seedId of seedIdsForRecipe(doomed)) {
+        if (!state.removedSeedIds.includes(seedId)) state.removedSeedIds.push(seedId);
+      }
+      state.recipes = state.recipes.filter((r) => r.id !== editingId);
+      for (const day of DAYS) {
+        for (const slot of SLOTS) {
+          const items = slotItems(day.id, slot.id);
+          if (!items) continue;
+          state.days[day.id][slot.id] = items.filter((i) => i.recipeId !== editingId);
+        }
+      }
+      saveState();
+      els.dialog.close();
+      render();
+    });
+
+    els.form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(els.form);
+      const payload = {
+        id: fd.get("id") || crypto.randomUUID(),
+        name: String(fd.get("name") || "").trim(),
+        baseServings: Number(fd.get("baseServings")) || 1,
+        ingredients: parseIngredientsField(fd.get("ingredients")),
+        instructions: String(fd.get("instructions") || "").trim(),
+      };
+      for (const n of NUTRIENTS) {
+        payload[n.key] = Number(fd.get(n.key)) || 0;
+      }
+      if (!payload.name) return;
+
+      const idx = state.recipes.findIndex((r) => r.id === payload.id);
+      if (idx >= 0) state.recipes[idx] = payload;
+      else state.recipes.push(payload);
+
+      saveState();
+      els.dialog.close();
+      render();
+    });
+
+    els.targets.addEventListener("change", (e) => {
+      const input = e.target.closest("input[data-target]");
+      if (!input) return;
+      state.targets[input.dataset.target] = Number(input.value) || 0;
+      saveState();
+      renderDays();
+    });
+
+    els.days.addEventListener("click", (e) => {
+      const clearBtn = e.target.closest("[data-clear-day]");
+      if (clearBtn) {
+        const dayId = clearBtn.dataset.clearDay;
+        const label = DAYS.find((d) => d.id === dayId)?.label || "this day";
+        if (!confirm(`Clear all meals from ${label}?`)) return;
+        state.days[dayId] = emptyDayPlan();
+        saveState();
+        render();
+        return;
+      }
+
+      const addBtn = e.target.closest("[data-add]");
+      if (addBtn) {
+        const row = addBtn.closest(".add-row");
+        const dayId = addBtn.dataset.day;
+        const slotId = addBtn.dataset.slot;
+        const select = row?.querySelector("[data-add-select]");
+        const servingsInput = row?.querySelector("[data-add-servings]");
+        const recipeId = select?.value;
+        const servings = Number(servingsInput?.value) || 1;
+        if (!recipeId) return;
+        if (!addRecipeToSlot(dayId, slotId, recipeId, servings)) return;
+        saveState();
+        render();
+        return;
+      }
+
+      const removeBtn = e.target.closest("[data-remove]");
+      if (removeBtn) {
+        const { dayId, slotId, index } = parseKey(removeBtn.dataset.remove);
+        const items = slotItems(dayId, slotId);
+        if (!items) return;
+        items.splice(index, 1);
+        saveState();
+        render();
+        return;
+      }
+
+      const dec = e.target.closest("[data-serv-dec]");
+      if (dec) {
+        const { dayId, slotId, index } = parseKey(dec.dataset.servDec);
+        const item = slotItems(dayId, slotId)?.[index];
+        if (!item) return;
+        item.servings = Math.max(0.25, Math.round((item.servings - 0.25) * 100) / 100);
+        saveState();
+        render();
+        return;
+      }
+
+      const inc = e.target.closest("[data-serv-inc]");
+      if (inc) {
+        const { dayId, slotId, index } = parseKey(inc.dataset.servInc);
+        const item = slotItems(dayId, slotId)?.[index];
+        if (!item) return;
+        item.servings = Math.round((item.servings + 0.25) * 100) / 100;
+        saveState();
+        render();
+      }
+    });
+
+    els.days.addEventListener("change", (e) => {
+      const select = e.target.closest("[data-add-select]");
+      if (select) {
+        const recipeId = select.value;
+        if (!recipeId) return;
+        const row = select.closest(".add-row");
+        const servingsInput = row?.querySelector("[data-add-servings]");
+        const servings = Number(servingsInput?.value) || 1;
+        if (!addRecipeToSlot(select.dataset.day, select.dataset.slot, recipeId, servings)) return;
+        saveState();
+        render();
+        return;
+      }
+
+      const input = e.target.closest("[data-servings]");
+      if (!input) return;
+      const { dayId, slotId, index } = parseKey(input.dataset.servings);
+      const item = slotItems(dayId, slotId)?.[index];
+      if (!item) return;
+      item.servings = Math.max(0.25, Number(input.value) || 0.25);
+      saveState();
+      render();
+    });
+
+    els.recipeList.addEventListener("click", (e) => {
+      const instructionsBtn = e.target.closest("[data-instructions]");
+      if (instructionsBtn) {
+        openInstructions(recipeById(instructionsBtn.dataset.instructions));
+        return;
+      }
+      const btn = e.target.closest("[data-edit]");
+      if (!btn) return;
+      openDialog(recipeById(btn.dataset.edit));
+    });
+
+    els.closeInstructions.addEventListener("click", () => els.instructionsDialog.close());
+
+    render();
+  </script>
+</body>
+</html>
