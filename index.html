@@ -850,6 +850,12 @@ Fibre 8g · Sugar 14g · Sodium 180mg"></textarea>
           <input id="sync-gist-id" type="text" autocomplete="off" placeholder="e.g. a1b2c3d4…" />
         </label>
       </div>
+      <p class="panel-sub" style="margin-top:0.5rem;">Moved from the old local file? Use backup below to bring your plan across.</p>
+      <div class="toolbar" style="margin:0 0 0.75rem;">
+        <button class="btn btn-ghost" type="button" id="export-backup">Export backup</button>
+        <button class="btn btn-ghost" type="button" id="import-backup">Import backup</button>
+        <input id="import-backup-file" type="file" accept="application/json,.json" hidden />
+      </div>
       <p class="sync-status" id="sync-status"></p>
       <div class="dialog-actions">
         <button class="btn btn-ghost" type="button" id="sync-now-btn">Sync now</button>
@@ -1533,6 +1539,9 @@ Per 100g:
       syncNowBtn: document.getElementById("sync-now-btn"),
       saveSync: document.getElementById("save-sync"),
       closeSync: document.getElementById("close-sync"),
+      exportBackup: document.getElementById("export-backup"),
+      importBackup: document.getElementById("import-backup"),
+      importBackupFile: document.getElementById("import-backup-file"),
     };
 
     function setSyncStatus(message, tone = "") {
@@ -1685,6 +1694,57 @@ Per 100g:
         syncSettings.gistId ? "ok" : ""
       );
       els.syncDialog.showModal();
+    }
+
+    function exportBackup() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `meal-planner-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setSyncStatus("Backup downloaded.", "ok");
+    }
+
+    function importBackupFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(String(reader.result || ""));
+          const data = parsed?.data && (parsed.data.days || parsed.data.recipes)
+            ? parsed.data
+            : parsed;
+          if (!data?.days && !Array.isArray(data?.recipes)) {
+            throw new Error("That file doesn’t look like a meal planner backup.");
+          }
+          const base = defaultState();
+          state = {
+            ...base,
+            ...data,
+            targets: { ...base.targets, ...(data.targets || {}) },
+            recipes: Array.isArray(data.recipes) ? data.recipes : base.recipes,
+            removedSeedIds: Array.isArray(data.removedSeedIds) ? data.removedSeedIds : [],
+            shopChecked: Array.isArray(data.shopChecked) ? data.shopChecked : [],
+            shopRepeats: {
+              dayA: Math.max(0, Number(data.shopRepeats?.dayA) || 1),
+              dayB: Math.max(0, Number(data.shopRepeats?.dayB) || 1),
+            },
+            days: {
+              dayA: normalizeDayPlan(data.days?.dayA),
+              dayB: normalizeDayPlan(data.days?.dayB),
+            },
+            updatedAt: new Date().toISOString(),
+          };
+          saveState();
+          render();
+          setSyncStatus("Backup imported. Tap Sync now to upload it to the cloud.", "ok");
+        } catch (err) {
+          setSyncStatus(err.message || "Could not import that file.", "err");
+        }
+      };
+      reader.readAsText(file);
     }
 
     function recipeById(id) {
@@ -2346,6 +2406,13 @@ Per 100g:
 
     els.syncSettingsBtn.addEventListener("click", openSyncDialog);
     els.closeSync.addEventListener("click", () => els.syncDialog.close());
+    els.exportBackup.addEventListener("click", exportBackup);
+    els.importBackup.addEventListener("click", () => els.importBackupFile.click());
+    els.importBackupFile.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      importBackupFile(file);
+      e.target.value = "";
+    });
     els.saveSync.addEventListener("click", async () => {
       const token = els.syncToken.value.trim();
       const gistId = els.syncGistId.value.trim();
