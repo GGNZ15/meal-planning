@@ -1,287 +1,250 @@
-# Meal idea candidates — 29 July 2026 (re-run: 2 options per night)
+# Meal idea candidates — 22 August 2026 (breakfast + lunch, 2 options per Day A/Day B slot)
 
-Generated from: recipetineats.com, vjcooks.com, tamingtwins.com, bbcgoodfood.com, mybalanceproject.co.nz, movewithus.com.au — two dinner options per night for next week, following the household's weekly dinner structure in `meal-ideas-rules.md`. The Instagram source (_elliewilsonfitness__) wasn't used this run since captions can't be fetched directly — happy to include it next time if you paste a caption in.
+Generated from: vjcooks.com, movewithus.com.au — breakfast and lunch options for the adult
+female's meal prep (Day A / Day B structure), per `meal-ideas-rules.md`. No dinner
+candidates this run (user requested breakfast/lunch only). recipetineats.com,
+bbcgoodfood.com, tamingtwins.com and mybalanceproject.co.nz were checked but didn't turn
+up anything that beat the picks below on the 35g+ protein / meal-prep-friendly criteria
+for breakfast — happy to dig further there if you want more options. The Instagram source
+(_elliewilsonfitness__) wasn't used since captions can't be fetched directly.
 
-No new Wednesday or Sunday candidates — Wednesday reuses Tuesday's leftovers, and Sunday keeps the standing salmon bake.
+**Sodium heads-up**: the two egg/bacon-based VJ Cooks breakfasts (1a and 2b) are quite
+salty — 1135–1701mg sodium in a single serve against your 2000mg/day target. Worth
+knowing before you lean on those often; swapping to reduced-salt bacon/ham or halving the
+cheese would bring them down a lot.
 
 Reply with which to add, e.g. "add 1a and 2b", "add all the A options", or "add all".
 
-## 1. Monday
+## 1. Day A breakfast
 
-### 1a. One Pot Chicken and Pasta
+### 1a. Bacon and Egg Cups (×3 per serve)
 
-- Source: https://vjcooks.com/one-pot-chicken-pasta/
-- Serves: 4
-- Macros (per serve): 450 kcal · P 41g · C 52g · F 32g · Fibre 3g · Sugar 12g · Sodium 607mg (all source-confirmed)
-- Fit check: Fits the dinner range (450–600 kcal, 35g+ protein) at the low end with protein well above target. ~30 min, stovetop only, no shellfish.
+- Source: https://vjcooks.com/bacon-egg-cups/
+- Serves: 1 (recipe makes 12 cups total; this serve = 3 cups)
+- Macros (per serve): 582 kcal · P 45g · C 6g · F 42g · Fibre 0g · Sugar 0g · Sodium 1701mg
+  (all scaled directly from the source's confirmed per-cup figures)
+- Fit check: Comfortably clears the breakfast range (450–600 kcal, 35g+ protein) with
+  protein to spare. No shellfish. **Caution: very high sodium (1701mg = 85% of your daily
+  target in one meal)** — consider reduced-salt bacon or fewer cups if you're watching
+  sodium that day.
+- Ingredients (for full batch of 12 cups — freeze extra or halve the recipe):
+  - 250g streaky bacon (6 rashers)
+  - 10 eggs
+  - 50g baby spinach, chopped
+  - 100g cheese, grated
+  - Handful of chopped Italian parsley
+  - 1 spring onion, finely chopped
+  - ½ tsp salt
+  - ½ tsp white pepper
+- Instructions:
+  1. Preheat oven to 180°C. Line a 12-cup muffin tin with the bacon rashers, pressing
+     each around the sides of a cup to form a lining.
+  2. Whisk eggs, spinach, cheese, parsley, spring onion, salt and pepper together.
+  3. Pour egg mixture evenly into the bacon-lined cups.
+  4. Bake for about 20 minutes, until just set.
+  5. Cool, then store in the fridge (up to a few days) — reheat 2–3 cups per serve in the
+     microwave or air fryer. Can also be frozen (flash-freeze then bag) for up to 3 months.
+
+### 1b. High Protein, Freezer Friendly Breakfast Burritos
+
+- Source: https://vjcooks.com/breakfast-burritos/
+- Serves: 6 (1 burrito per serve)
+- Macros (per serve): 654 kcal · P 29g · C 49g · F 38g · Fibre 4g · Sugar 3g · Sodium 1135mg
+  (all source-confirmed)
+- Fit check: Slightly over the breakfast calorie range (+54 kcal) and a touch under the
+  35g protein target (-6g), but close on both and a genuinely practical grab-and-go/freezer
+  option. Sodium is also high (1135mg) — same caution as 1a, though less extreme.
 - Ingredients:
-  - 1 Tbsp olive oil
-  - 400g chicken thigh or breast, diced
-  - 1 small onion, sliced
-  - 3 cloves garlic, crushed
-  - 1 Tbsp Italian herbs
-  - 1 tsp wholegrain mustard
-  - Zest and juice of half a small lemon
-  - 150g baby spinach
-  - 600ml chicken stock
-  - 1 cup (250ml) milk
-  - 250g pasta spirals or penne
-  - ½ cup (125g) sour cream
-  - ½ cup grated cheese
+  - 6 hash browns
+  - 6 sausage breakfast patties
+  - 9 eggs
+  - ½ cup milk
+  - 100g colby cheese, grated
+  - 100g tomato salsa
+  - 2 spring onions, finely sliced
+  - 6 large white tortillas
 - Instructions:
-  1. Heat oil in a large frypan, add chicken and onion, cook stirring occasionally for 5 minutes.
-  2. Add garlic, Italian herbs, mustard, lemon zest and juice, stir through.
-  3. Scatter in baby spinach, stir through, lid on until wilted.
-  4. Pour in stock, milk and pasta, stir to combine.
-  5. Bring to a boil, reduce to medium, stir every few minutes until liquid absorbed and pasta is al dente.
-  6. Stir through sour cream and grated cheese, season to taste.
-  7. Serve immediately.
+  1. Cook hash browns and sausage patties according to packet instructions.
+  2. Whisk eggs with milk, scramble in a pan until just set.
+  3. Assemble each tortilla with a sausage patty, scrambled egg, a hash brown, grated
+     cheese, salsa and spring onion. Roll up tightly.
+  4. Toast each wrapped burrito in a dry frying pan until golden on both sides (or freeze
+     first, see below).
+  5. To store: wrap each burrito individually in foil. Fridge up to 3 days, or freeze up
+     to 3 months — defrost and reheat as needed.
 
-### 1b. Creamy Chicken and Vegetable Risoni (Orzo)
+## 2. Day B breakfast
 
-- Source: https://www.recipetineats.com/one-pot-chicken-vegetable-parmesan-orzo-risoni/
-- Serves: 4
-- Macros (per serve): 536 kcal · P 37g · C 65g · F 15g · Fibre 5g · Sugar 15g · Sodium 858mg (all source-confirmed)
-- Fit check: Fits the dinner range comfortably, and it's genuinely fast — 10 min prep, 10 min cook. Explicitly described as a hit with kids ("hidden vegetables"), one pot, no shellfish. Sodium is on the higher side (858mg) — using low-sodium stock (as the recipe already calls for) helps.
+### 2a. Pistachio Overnight Weet-Bix
+
+- Source: https://movewithus.com.au/blogs/recipes/pistachio-overnight-weetbix
+- Serves: 1
+- Macros (per serve): 547 kcal · P 47g · C 59g · F 14g · Fibre 6g (estimated) · Sugar 15g
+  (estimated) · Sodium 250mg (estimated — everything else source-confirmed)
+- Fit check: Fits the breakfast range well with protein well above target. No-cook,
+  prep-the-night-before — good variety against the egg-heavy options above, and far lower
+  sodium. Pistachio spread may need a substitute (e.g. peanut or almond butter) if your
+  Woolworths doesn't stock it.
 - Ingredients:
-  - 1 Tbsp olive oil
-  - 2 garlic cloves, minced
-  - ½ onion, diced
-  - 250g chicken thigh or breast, cut into bite-size pieces
-  - 2½ cups frozen diced vegetables (carrot, peas, corn, capsicum — any mix)
-  - 1½ cups orzo/risoni, uncooked
-  - 1½ Tbsp flour
-  - 2¼ cups milk
-  - 2 cups low-sodium chicken or vegetable stock
-  - 3 cups baby spinach, packed
-  - ¾ cup finely grated parmesan
-  - ¼ tsp salt, ¼ tsp black pepper
+  - 45g Weet-Bix
+  - 30g whey protein powder
+  - 160g Greek yoghurt (plain, no fat)
+  - 25g pistachio spread (sub peanut/almond butter if unavailable)
+  - 4g crushed pistachios (sub crushed almonds/peanuts)
+  - 100ml oat milk
 - Instructions:
-  1. Heat oil in a large, fairly deep pan over high heat. Add garlic and onion, cook 1 minute.
-  2. Add chicken, sear 2 minutes until outside is seared but still raw inside.
-  3. Add frozen vegetables and flour, stir until flour is incorporated.
-  4. Add uncooked risoni, stock and milk, stir well.
-  5. Bring to a simmer, cook 7 minutes (no lid), stirring occasionally, until risoni is almost tender.
-  6. Add parmesan, spinach, salt and pepper, stir until spinach wilts.
-  7. Serve — sauce thickens further as it sits. Garnish with parsley/extra parmesan if desired.
+  1. Crush the Weet-Bix into a jar or container.
+  2. Mix in the protein powder, Greek yoghurt, pistachio spread and oat milk until
+     combined.
+  3. Top with crushed pistachios.
+  4. Cover and refrigerate overnight (at least a few hours). Eat cold, straight from the
+     fridge.
 
-## 2. Tuesday (prep-ahead, covers Wednesday too)
+### 2b. Egg & Ham Breakfast Muffins
 
-### 2a. Slow Cooker Beef Pot Roast
-
-- Source: https://www.recipetineats.com/slow-cooker-beef-pot-roast/
-- Serves: 8 (large batch — covers Tuesday dinner + Wednesday leftovers, with extra to freeze)
-- Macros (per serve, 481g): 615 kcal · P 53g · C 23g · F 33g · Fibre 4g · Sugar 2g · Sodium 704mg (all source-confirmed)
-- Fit check: Slightly over 600 kcal but excellent protein, low sugar. Complete one-pot meal (meat + veg + gravy) so Wednesday is just a reheat, no extra sides needed. 15 min prep then ~8.5 hours fully hands-off. No shellfish. Uses red wine (can sub beef broth to skip alcohol).
+- Source: https://vjcooks.com/egg-ham-breakfast-muffins/
+- Serves: 6 (1 muffin per serve)
+- Macros (per serve): 424 kcal · P 27g · C 36g · F 18g · Fibre 2g · Sugar 7g · Sodium 1283mg
+  (all source-confirmed)
+- Fit check: Under the breakfast range on both calories (-176) and protein (-8g) as a
+  single muffin — the quickest/lightest of the four options, good if you're pairing it
+  with a coffee/protein drink to close the gap. High sodium (1283mg), same family of
+  caution as 1a/1b.
 - Ingredients:
-  - 2kg beef chuck roast, rolled
-  - 1 tsp each salt and pepper
-  - 2 Tbsp olive oil
-  - 1 large onion, diced
-  - 5 garlic cloves, smashed
-  - 5 carrots, cut into 2.5cm pieces
-  - 3 celery stalks, cut into 4cm pieces
-  - 1 cup (250ml) dry red wine (or sub beef broth)
-  - 3 cups (750ml) salt-reduced beef broth
-  - ⅓ cup (50g) plain flour
-  - 1 tsp dried rosemary
-  - 1½ tsp dried thyme
-  - 750g potatoes, peeled and cut into 2.5cm pieces
+  - 6 eggs
+  - 250g cottage cheese
+  - ½ tsp salt
+  - ¼ tsp white pepper
+  - 2 Tbsp parsley, chopped
+  - 6 English muffins
+  - 150g ham, sliced
+  - 6 slices cheese
+  - 6 Tbsp barbecue sauce
 - Instructions:
-  1. Pat beef dry, season generously with salt and pepper.
-  2. Sear aggressively in oil in a hot skillet, ~7 minutes, until deep brown. Transfer to slow cooker.
-  3. In the same skillet, cook onion and garlic 2 minutes until browned.
-  4. Add wine, reduce by half, transfer to slow cooker.
-  5. Mix flour with 1 cup of the broth (lumps fine), pour into slow cooker.
-  6. Add remaining broth, carrots, celery, rosemary and thyme.
-  7. Cover, slow cook on LOW for 5 hours.
-  8. Add potatoes, slow cook a further 3 hours on LOW.
-  9. Remove beef, rest 5 minutes, slice thickly. Adjust seasoning of the sauce.
-  10. Serve beef with vegetables and plenty of sauce. Reheat leftovers gently on Wednesday.
+  1. Whisk eggs with cottage cheese, salt, pepper and parsley.
+  2. Split and lightly toast the English muffins. Top each base with ham, a slice of
+     cheese and a spoon of barbecue sauce.
+  3. Pour the egg mixture over/around and assemble as a muffin sandwich, or bake
+     open-faced in a muffin tin until egg is set (whichever is easier for your setup).
+  4. Wrap each in foil once cooled. Fridge up to 3–4 days, or freeze — reheat in a
+     sandwich press, air fryer, or microwave.
 
-### 2b. Slow Cooked Honey, Butter & Garlic Chicken
+## 3. Day A lunch
 
-- Source: https://www.mybalanceproject.co.nz/recipes/2024/3/30/slow-cooked-honey-garlic-chicken
-- Serves: 5 (estimated — recipe uses 4–6 thighs, assumed 5)
-- Macros (per serve, estimated from ingredients — no panel published): ~505 kcal · P 27g · C 28g · F 32g · Fibre 0g · Sugar ~27g (estimated) · Sodium ~955mg (estimated)
-- Fit check: The source literally recommends this for a two-night meal — "night two we often use for quesadillas" — a near-perfect match for the Tuesday-leftovers-into-Wednesday rule, and it's genuinely hands-off (10 min prep, then 6–8 hours in the slow cooker). **However**: the honey-butter sauce is high in sugar (~27g estimated per serve — over half your daily 45g target) and the soy sauce + salt rub push sodium up too (~955mg estimated). Consider halving the honey and using low-salt soy sauce if you want to bring this down, or treat as an occasional swap for the pot roast rather than a regular rotation. No shellfish.
+### 3a. Chicken Pesto Sandwich
+
+- Source: https://movewithus.com.au/blogs/nutrition/macro-friendly-lunch-ideas
+- Serves: 1
+- Macros (per serve): 340 kcal · P 35g · C 33g · F 8g · Fibre 4g (estimated) · Sugar 4g
+  (estimated) · Sodium 450mg (estimated — cal/protein/fat/carb source-confirmed)
+- Fit check: Just under the lunch calorie floor (-10 kcal) but hits the protein target
+  exactly — very quick, minimal cooking. Best assembled fresh each day (cook the chicken
+  in bulk ahead, keep bread separate) rather than pre-made 5 days out, since bread doesn't
+  hold well.
+- Ingredients (per serve — scale up for the week):
+  - 80g wholemeal bread
+  - 110g chicken breast (no skin, weighed raw)
+  - 10g basil pesto
+  - 50g tomato
+  - 10g spinach
+  - Red onion, to taste
+- Instructions:
+  1. Slice tomato and onion.
+  2. Heat a pan over medium-high with a light spray of oil. Cook chicken, seasoned to
+     taste, 3–4 minutes each side until cooked through. Set aside (can batch-cook chicken
+     for the whole week here).
+  3. Spread bread with basil pesto.
+  4. Top one slice with spinach, tomato and onion, then the chicken. Close sandwich.
+     Toast if desired.
+
+### 3b. Big Mac Burger Bowl
+
+- Source: https://movewithus.com.au/blogs/recipes/big-mac-burger-bowl
+- Serves: 1 (ingredients below are per serve)
+- Macros (per serve): 468 kcal · P 30g · C 21g · F 29g · Fibre 3g (estimated) · Sugar 5g
+  (estimated) · Sodium 700mg (estimated — cal/protein/fat/carb source-confirmed)
+- Fit check: Fits the lunch range well. Needs the air fryer (you have one). No shellfish.
+  Keeps well as a fridge meal-prep bowl — cook potato/mince components ahead, assemble
+  fresh or reheat together.
 - Ingredients:
-  - 4–6 boneless, skinless chicken thighs
-  - ½ cup butter (or butter alternative)
-  - ½ cup runny honey
-  - 2 Tbsp rice wine vinegar
-  - 2 Tbsp soy sauce
-  - ½ Tbsp minced garlic
-  - Rub: 1 tsp each smoked paprika, onion powder, garlic powder, salt
-  - ½ tsp brown sugar
-  - 1 Tbsp oil
+  - 120g white potato (raw), cut into chip-sized pieces
+  - 100g beef mince (lean, raw)
+  - 15g cheddar cheese (light, tasty)
+  - 20g lettuce
+  - 4g olive oil
+  - 30g "special burger sauce" (kewpie mayo + tomato sauce + a little pickle juice/mustard)
+  - 1 tsp minced garlic
+  - White onion, to taste
+  - ½ tsp paprika
+  - Pickles, to taste
 - Instructions:
-  1. Heat all sauce ingredients (butter, honey, vinegar, soy sauce, garlic) in a pot until simmering, then remove from heat.
-  2. Mix rub ingredients and rub onto the chicken.
-  3. Optional: sear chicken on high heat for 5 minutes to lock in flavour.
-  4. Place chicken in slow cooker, pour sauce over the top.
-  5. Cook on LOW for 6–8 hours (or HIGH for 4 hours).
-  6. Optional: reduce the leftover liquid on the stovetop for ~10 minutes to thicken (skim fat first), serve over the chicken.
+  1. Slice potato into chips, soak in ice water 15 minutes, drain and pat dry.
+  2. Toss potato with oil, salt and pepper. Air fry at 180°C for 15 minutes.
+  3. Meanwhile, heat a pan, sauté garlic and diced onion 1–2 minutes. Add beef mince,
+     paprika, salt and pepper, cook 4–5 minutes, breaking apart as it cooks.
+  4. Sprinkle cheese over the mince, cover to melt.
+  5. Assemble bowl: chips and lettuce on the bottom, top with beef, pickles and burger
+     sauce.
 
-## 3. Thursday (feeds 4 adults + toddler)
+## 4. Day B lunch
 
-### 3a. Chicken Burrito Rice
+### 4a. Chicken Yellow Curry
 
-- Source: https://www.tamingtwins.com/chicken-burrito-rice/
-- Serves: 4 as written — scale ingredients ×1.25–1.5 for the bigger Thursday group (e.g. ~500–600g chicken); set the servings count you need in the planner and nutrition/shopping list scale automatically.
-- Macros (per serve, as written): 748 kcal · P 48g · C 110g · F 13g · Fibre 14g · Sugar 11g · Sodium 611mg (all source-confirmed)
-- Fit check: Calories run high (748) but protein and especially fibre (14g!) are excellent. One-pan, low-effort dump-and-bake, good for a bigger crowd. No shellfish, mild enough for a toddler.
+- Source: https://movewithus.com.au/blogs/nutrition/macro-friendly-lunch-ideas
+- Serves: 1
+- Macros (per serve): 390 kcal · P 35g · C 38g · F 11g · Fibre 3g (estimated) · Sugar 4g
+  (estimated) · Sodium 700mg (estimated — cal/protein/fat/carb source-confirmed; tamari
+  and fish sauce are the main sodium contributors)
+- Fit check: Fits the lunch range well and hits protein target. Stovetop only, no
+  shellfish, no Instant Pot. Keeps 3–4 days in the fridge per the source — good
+  meal-prep candidate.
 - Ingredients:
-  - 400g chicken breast, cubed
-  - 1 red onion, diced
-  - 400g tinned black beans, drained and rinsed
-  - 1 red pepper, sliced
-  - 160g tinned sweetcorn
-  - 400g tinned chopped tomatoes
-  - 3 Tbsp fajita seasoning
-  - 300g basmati rice, rinsed and drained
-  - 600ml hot stock (vegetable or chicken)
-  - 80g grated cheddar
-  - Salt and pepper, to taste
-  - 15g coriander, chopped, to serve
+  - 135g chicken breast (no skin, weighed raw)
+  - 45g white rice (weighed raw)
+  - 75g green beans
+  - 100ml tinned coconut milk (light)
+  - 15g yellow curry paste
+  - White onion, to taste
+  - Red chilli, to taste
+  - 2 tsp tamari
+  - 2 tsp lime juice
+  - 2 tsp fish sauce
 - Instructions:
-  1. Preheat oven to 180°C fan / 200°C / gas mark 6.
-  2. Mix everything except cheddar and coriander in a baking dish, season, cover with foil. Bake 30 minutes (rice should be submerged in stock).
-  3. Stir halfway through, add more stock if dry, re-cover.
-  4. Bake a further 10–20 minutes until rice is cooked and chicken is hot throughout.
-  5. Scatter cheddar over the top, grill a few minutes to melt.
-  6. Sprinkle with coriander and serve.
+  1. Dice onion, slice chilli, trim and halve green beans. Cut chicken into bite-sized
+     pieces.
+  2. Sauté onion 2–3 minutes in a lightly oiled saucepan. Add chicken, cook 3–4 minutes
+     until browning. Add curry paste, chilli, salt and pepper, stir 30 seconds until
+     fragrant. Add green beans.
+  3. Add coconut milk plus enough water to cover. Add tamari, fish sauce, lime juice.
+     Stir, cover, simmer on medium-low 15–20 minutes until chicken is cooked and beans
+     are tender.
+  4. Cook rice per packet instructions. Serve curry over rice, top with extra chilli and
+     lime juice to taste.
 
-### 3b. Easy Shepherd's Pie
+### 4b. Turkey Pasta Bake
 
-- Source: https://www.tamingtwins.com/shepherds-pie/
-- Serves: 4 as written (per the nutrition basis below) — the source notes it can stretch to 6 smaller portions, which suits Thursday's bigger group well; freezes for up to a month too.
-- Macros (per serve): 395 kcal · P 23g · C 29g · F 21g · Fibre 5g · Sugar 3g · Sodium 415mg (all source-confirmed)
-- Fit check: Calories/sodium/sugar are all comfortably within range, and it's the lowest-sodium option in this batch. Protein (23g) is under the 35g+ dinner target though — consider adding a side of extra veg or a bit more lamb mince to boost it. Great batch-cook/freezer option. No shellfish.
+- Source: https://movewithus.com.au/blogs/nutrition/macro-friendly-lunch-ideas
+- Serves: 1
+- Macros (per serve): 491 kcal · P 45g · C 53g · F 12g · Fibre 4g (estimated) · Sugar 10g
+  (estimated) · Sodium 650mg (estimated — cal/protein/fat/carb source-confirmed)
+- Fit check: Fits at the top of the lunch range with the highest protein of the four lunch
+  options. One-container meal, keeps 3–4 days in the fridge per the source — great
+  meal-prep candidate. No shellfish, no Instant Pot.
 - Ingredients:
-  - Filling: 1 Tbsp olive oil
-  - 500g lean lamb mince
-  - 1 onion, chopped
-  - 2 carrots, finely chopped
-  - 2 celery sticks, finely chopped
-  - 1 Tbsp plain flour
-  - 1 tsp dried thyme
-  - 1 tsp dried sage
-  - 500ml hot beef stock
-  - 2 Tbsp tomato purée
-  - 2 Tbsp Worcestershire sauce
-  - Salt and pepper, to taste
-  - Topping: 1kg white potatoes
-  - 2 Tbsp butter
-  - Salt and pepper, to taste
+  - 125g turkey breast mince (extra lean, weighed raw)
+  - 60g pasta (weighed raw)
+  - 150g tomato basil pasta sauce
+  - 15g spinach
+  - 15g cheddar cheese, shredded
+  - White onion, to taste
+  - 1 clove garlic
 - Instructions:
-  1. Preheat oven to 180°C fan / 200°C / gas mark 6.
-  2. Fry mince in olive oil over high heat ~5 minutes until browned.
-  3. Add chopped vegetables, fry a further 10 minutes until softened.
-  4. Add flour and dried herbs, stir to coat, cook 2–3 minutes.
-  5. Pour in beef stock, tomato purée and Worcestershire sauce. Season well.
-  6. Cover and simmer 30 minutes (until thick, deep brown gravy).
-  7. Meanwhile, peel, chop and boil potatoes 15–20 minutes, then drain and mash with butter, salt and pepper.
-  8. Spread meat mixture into an ovenproof dish, top with mash, ruffle with a fork (optional grated cheese on top).
-  9. Bake 25–30 minutes until mash is browning and mince is bubbling at the sides.
-
-## 4. Friday
-
-### 4a. One Pot Creamy Chicken Orzo
-
-- Source: https://vjcooks.com/one-pot-creamy-chicken-orzo/
-- Serves: 4
-- Macros (per serve): 726 kcal · P 48g · C 58g · F 31g · Fibre 4g · Sugar 7g · Sodium 506mg (all source-confirmed)
-- Fit check: Borderline — calories (726) run well over the 450–600 dinner guideline, though protein is strong. Smaller portion + side salad instead of bread would bring it back into range. ~30 min, one pan, no shellfish.
-- Ingredients:
-  - 1 tsp oil
-  - 1 onion, finely diced
-  - 500g chicken mince
-  - 1 tsp dried Italian herbs
-  - 1 Tbsp crushed garlic
-  - 2 Tbsp sun-dried tomatoes, finely chopped
-  - 400g orzo pasta
-  - 2 chicken stock cubes
-  - 500ml boiling water
-  - 400g tin crushed tomatoes
-  - 70g baby spinach
-  - 125ml cream
-  - 100g grated cheese
-- Instructions:
-  1. Sauté onion in oil over low heat, add mince and cook until browning. Stir in garlic, herbs and sun-dried tomatoes.
-  2. Add orzo, mix, toast 2 minutes.
-  3. Dissolve stock cubes in boiling water, pour in to deglaze, add crushed tomatoes, mix.
-  4. Simmer on low, stirring often, until most liquid is absorbed and orzo is nearly cooked. Stir in spinach until wilted.
-  5. Stir in cream then cheese, season to taste.
-  6. Garnish with herbs, serve immediately.
-
-### 4b. Quick Korean Beef
-
-- Source: https://vjcooks.com/quick-korean-beef/
-- Serves: 4
-- Macros (per serve): 429 kcal · P 45g · C 22g · F 17g · Fibre 1g · Sugar 7g · Sodium 737mg (all source-confirmed)
-- Fit check: Great fit — calories and protein land right in range, quick to cook, and explicitly kid-friendly ("mild flavours, kids love rice and mince"). No shellfish. Fibre is low (1g) — a side of steamed greens would help round it out.
-- Ingredients:
-  - 1 Tbsp sesame oil
-  - 1 onion, finely diced
-  - 1 carrot, finely diced
-  - 500g lean beef mince
-  - 2 tsp crushed garlic
-  - 1 Tbsp crushed ginger
-  - ¼ cup low-salt soy sauce
-  - 2 Tbsp brown sugar
-  - 2 tsp apple cider vinegar
-  - 1 tsp cornflour
-  - 1 beef oxo cube + ½ cup boiling water (or ½ cup beef stock)
-  - Cooked white rice, to serve
-  - Sriracha (optional) and spring onion, to serve
-- Instructions:
-  1. Heat sesame oil, cook onion and carrot 5 minutes.
-  2. Add mince, break up, cook 5–10 minutes until browned. Add garlic and ginger, stir until fragrant.
-  3. Mix soy sauce, brown sugar, vinegar and cornflour in a jug, pour over mince, stir through.
-  4. Dissolve oxo cube in boiling water, pour in, simmer until sauce thickens. Season to taste.
-  5. Serve on rice with a swirl of sriracha and spring onion garnish.
-
-## 5. Saturday
-
-### 5a. Quick Chicken Noodles
-
-- Source: https://www.bbcgoodfood.com/recipes/quick-chicken-noodles
-- Serves: 2 (estimated from ingredient quantities — not stated explicitly on the source page)
-- Macros (per serve): 441 kcal · P 31g · C 55g · F 12g · Fibre 5g · Sugar 11g · Sodium ~1628mg (source gives salt 4.07g; sodium converted, salt(g) × 400 = sodium mg)
-- Fit check: Fast (~7 min) and calories fit the range, but **sodium is very high** (~1628mg — over 80% of the daily 2000mg target in one serve) and it uses oyster sauce, which is shellfish-derived — worth weighing against your dislike of shellfish. Protein (31g) is just under the 35g+ target.
-- Ingredients:
-  - 4 skinless, boneless chicken thighs, diced
-  - 1 garlic clove, crushed or sliced
-  - 1 red pepper, thinly sliced
-  - Small bunch spring onion, sliced
-  - 1 Tbsp sunflower or vegetable oil
-  - 100g (3 handfuls) beansprouts
-  - 2 packs straight-to-wok noodles
-  - 3 Tbsp oyster sauce (or hoisin + soy sauce swap)
-- Instructions:
-  1. Heat oil, stir-fry chicken ~3 minutes until golden.
-  2. Add garlic and pepper, cook 2 minutes more.
-  3. Add spring onions, beansprouts, noodles, sauce and 5 Tbsp water, toss and cook a final 2 minutes. Serve immediately.
-
-### 5b. Bang Bang Chicken (air fryer)
-
-- Source: https://movewithus.com.au/blogs/recipes/bang-bang-chicken
-- Serves: 1 as written (ingredient quantities are per-serve — multiply by however many you're feeding)
-- Macros (per serve): 399 kcal · P 43g · C 39g · F 8g (source-confirmed) · Fibre ~2g, Sugar ~10g, Sodium ~900mg (all three estimated — not published; teriyaki sauce and stock powder are the main sodium sources and vary a lot by brand, so actual sodium could run higher or lower)
-- Fit check: A much better macro profile than 5a — high protein, low fat, no shellfish-derived sauces — and uses the air fryer, which is available equipment. Sodium isn't published but is likely still moderate-to-high from the teriyaki sauce and stock powder; using reduced-salt versions of both would help. Ready in under 20 minutes, and the corn-flake "nugget" format is toddler-friendly.
-- Ingredients (per serve — scale up for the family):
-  - 150g chicken breast, skinless, diced into 1-inch pieces
-  - 40g corn flakes (gluten-free optional), crushed
-  - 15ml teriyaki sauce (gluten-free optional)
-  - 1 egg
-  - ½ tsp cayenne pepper
-  - 1 tsp chicken stock powder
-  - 1 tsp sriracha
-- Instructions:
-  1. Dice chicken into 1-inch pieces.
-  2. Whisk egg in one bowl; in another, mix crushed corn flakes with cayenne pepper and stock powder.
-  3. Dip each chicken piece in egg, then corn flake mixture, to coat.
-  4. Air fry at 180°C for 8–10 minutes until cooked through.
-  5. Mix teriyaki with sriracha to make a marinade/drizzle.
-  6. Remove chicken from air fryer, drizzle with the teriyaki-sriracha mix, and serve.
+  1. Preheat oven to 190°C, line a deep baking dish with parchment.
+  2. Cook pasta per packet instructions.
+  3. Dice onion, mince garlic. Sauté in a pan 2–3 minutes until softened.
+  4. Add turkey mince, breaking apart as it cooks, season to taste.
+  5. When nearly cooked through, add pasta sauce, spinach and cooked pasta, stir to
+     combine.
+  6. Transfer to baking dish, top with cheese, cover with foil. Bake 12–15 minutes, then
+     uncover and grill 5 minutes until cheese is golden.
+  7. Cool and portion into containers — keeps 3–4 days in the fridge.
