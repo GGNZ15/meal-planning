@@ -1033,6 +1033,7 @@ Fibre 8g · Sugar 14g · Sodium 180mg"></textarea>
     // UI-only state (not persisted) — resets to these defaults on every page load.
     const uiState = {
       dayOpen: Object.fromEntries(DAYS.map((d) => [d.id, false])),
+      dayEditMode: Object.fromEntries(DAYS.map((d) => [d.id, false])),
       logEditMode: false,
     };
 
@@ -2344,7 +2345,7 @@ METHOD
       return progressBlockHtml(dayTotals(dayId), "Daily progress");
     }
 
-    function slotHtml(dayId, slot) {
+    function slotHtml(dayId, slot, editMode) {
       const items = slotItems(dayId, slot.id) || [];
       const options = state.recipes
         .map((r) => `<option value="${escapeHtml(String(r.id))}">${escapeHtml(r.name)}</option>`)
@@ -2356,22 +2357,24 @@ METHOD
             const recipe = recipeById(item.recipeId);
             const k = key(dayId, slot.id, index);
             if (!recipe) {
-              return `<div class="item"><div class="item-name">Missing recipe</div><div></div>
-                <button class="icon-btn" type="button" data-remove="${k}" aria-label="Remove">×</button></div>`;
+              return `<div class="item"><div class="item-name">Missing recipe</div>
+                ${editMode ? `<div></div><button class="icon-btn" type="button" data-remove="${k}" aria-label="Remove">×</button>` : ""}</div>`;
             }
             const scaled = scaleRecipe(recipe, item.servings);
             return `
               <div class="item">
                 <div>
                   <div class="item-name">${escapeHtml(recipe.name)}</div>
-                  <div class="item-meta">${fmt(scaled.calories)} kcal · P ${fmt(scaled.protein, 1)} · C ${fmt(scaled.carbs, 1)} · F ${fmt(scaled.fat, 1)}</div>
+                  <div class="item-meta">${fmt(item.servings, 2)} serving${item.servings === 1 ? "" : "s"} · ${fmt(scaled.calories)} kcal · P ${fmt(scaled.protein, 1)} · C ${fmt(scaled.carbs, 1)} · F ${fmt(scaled.fat, 1)}</div>
                 </div>
+                ${editMode ? `
                 <div class="servings-ctrl" title="Servings">
                   <button type="button" data-serv-dec="${k}" aria-label="Fewer servings">−</button>
                   <input data-servings="${k}" type="number" min="0.25" step="0.25" value="${item.servings}" />
                   <button type="button" data-serv-inc="${k}" aria-label="More servings">+</button>
                 </div>
                 <button class="icon-btn" type="button" data-remove="${k}" aria-label="Remove">×</button>
+                ` : ""}
               </div>
             `;
           }).join("")
@@ -2381,13 +2384,7 @@ METHOD
         ? `${items.length} item${items.length === 1 ? "" : "s"} · `
         : "";
 
-      return `
-        <article class="slot">
-          <div class="slot-head">
-            <h3>${slot.label}</h3>
-            <div class="slot-kcal">${countLabel}${fmt(slotCalories(dayId, slot.id))} kcal</div>
-          </div>
-          <div class="slot-items">${list}</div>
+      const addRow = editMode ? `
           <div class="add-row">
             <select data-add-select data-day="${dayId}" data-slot="${slot.id}" ${state.recipes.length ? "" : "disabled"}>
               ${state.recipes.length ? `<option value="">${placeholder}</option>${options}` : `<option value="">Add a food / recipe first</option>`}
@@ -2395,26 +2392,44 @@ METHOD
             <input data-add-servings data-day="${dayId}" data-slot="${slot.id}" type="number" min="0.25" step="0.25" value="1" aria-label="Servings to add" title="Servings" />
             <button class="btn btn-primary" type="button" data-add data-day="${dayId}" data-slot="${slot.id}">Add</button>
           </div>
+      ` : "";
+
+      return `
+        <article class="slot">
+          <div class="slot-head">
+            <h3>${slot.label}</h3>
+            <div class="slot-kcal">${countLabel}${fmt(slotCalories(dayId, slot.id))} kcal</div>
+          </div>
+          <div class="slot-items">${list}</div>
+          ${addRow}
         </article>
       `;
     }
 
     function renderDays() {
-      els.days.innerHTML = DAYS.map((day) => `
+      els.days.innerHTML = DAYS.map((day) => {
+        const editMode = uiState.dayEditMode[day.id];
+        const visibleSlots = editMode ? SLOTS : SLOTS.filter((slot) => (slotItems(day.id, slot.id) || []).length > 0);
+        const slotsHtml = visibleSlots.length
+          ? visibleSlots.map((slot) => slotHtml(day.id, slot, editMode)).join("")
+          : `<div class="empty">Nothing planned for ${day.label} yet.</div>`;
+        return `
         <details class="panel day-panel" data-day="${day.id}" ${uiState.dayOpen[day.id] ? "open" : ""}>
           <summary><h2>${day.label}</h2></summary>
           <div class="day-head">
             <p class="panel-sub" style="margin-bottom:0;">Each slot can hold multiple recipes. Servings scale the nutrition.</p>
-            <div class="toolbar">
-              <button class="btn btn-ghost" type="button" data-clear-day="${day.id}">Clear</button>
+            <div class="toolbar" style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+              <button class="btn btn-ghost" type="button" data-day-edit-toggle="${day.id}" aria-pressed="${String(editMode)}">${editMode ? "Done" : "Edit"}</button>
+              <button class="btn btn-ghost" type="button" data-clear-day="${day.id}" ${editMode ? "" : "hidden"}>Clear</button>
             </div>
           </div>
           <div class="slots">
-            ${SLOTS.map((slot) => slotHtml(day.id, slot)).join("")}
+            ${slotsHtml}
           </div>
           ${progressHtml(day.id)}
         </details>
-      `).join("");
+      `;
+      }).join("");
       els.days.querySelectorAll("details[data-day]").forEach((el) => {
         el.addEventListener("toggle", () => {
           uiState.dayOpen[el.dataset.day] = el.open;
@@ -3003,6 +3018,14 @@ METHOD
     });
 
     els.days.addEventListener("click", (e) => {
+      const editToggleBtn = e.target.closest("[data-day-edit-toggle]");
+      if (editToggleBtn) {
+        const dayId = editToggleBtn.dataset.dayEditToggle;
+        uiState.dayEditMode[dayId] = !uiState.dayEditMode[dayId];
+        renderDays();
+        return;
+      }
+
       const clearBtn = e.target.closest("[data-clear-day]");
       if (clearBtn) {
         const dayId = clearBtn.dataset.clearDay;
