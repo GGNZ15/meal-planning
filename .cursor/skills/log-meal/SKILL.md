@@ -49,12 +49,17 @@ uses, so a logged item shows up next time the app syncs — no need to open a br
    If there's no confident match (something not in the library, e.g. a cafe order,
    a one-off meal), or the match is ambiguous, ask the user to confirm rather than
    guessing which recipe they mean.
-4. **For anything not in the library**, estimate macros using the same heuristics as
-   the `find-meal-ideas` skill (see
-   [../find-meal-ideas/reference.md](../find-meal-ideas/reference.md) for the
-   nutrition-estimation cheat sheet), or ask the user for known values (e.g. a cafe
-   receipt or packet label). Always tell the user when a number is estimated rather
-   than confirmed.
+4. **For anything not in the library**, try to find real numbers before estimating:
+   - Branded/packaged products or well-known restaurant/chain menu items → try a quick
+     `WebSearch`/`WebFetch` lookup for the nutrition panel first (same approach
+     `find-meal-ideas` uses for recipe sites) — a sourced number beats an estimate.
+   - Homemade or ad hoc items with nothing findable online → estimate using the same
+     heuristics as the `find-meal-ideas` skill (see
+     [../find-meal-ideas/reference.md](../find-meal-ideas/reference.md) for the
+     nutrition-estimation cheat sheet).
+   - Either way, you can also just ask the user for known values (e.g. a cafe receipt
+     or packet label) — often faster than a lookup.
+   Always tell the user which numbers are sourced vs. estimated rather than confirmed.
 5. **Check against standing rules** in
    [../../../meal-ideas-rules.md](../../../meal-ideas-rules.md) if relevant (e.g. flag
    if something conflicts with a dislike/restriction) — informational only, never
@@ -78,7 +83,32 @@ uses, so a logged item shows up next time the app syncs — no need to open a br
    running totals for that date vs. targets from the script's output — call out
    anything already over or close to a daily target (calories, protein, sodium
    especially), similar in tone to the app's own progress indicators.
-10. Mention (briefly, not every time) that this will show up in the app next time it
+10. **Grow the database.** For any entry that had no `recipeId` (i.e. it wasn't a
+    library match — a new food, cafe order, or estimate), offer to save it into the
+    `Foods / Recipes` library too, e.g. "Want me to save '<name>' to your library so
+    it's an instant match next time?" If yes:
+    - Check for a name/id collision against existing `SEED_RECIPES` entries in
+      [index.html](../../../index.html) first — if a close match already exists, don't
+      duplicate it, just mention that it'll match automatically next time.
+    - Back out **per-serving** macros before saving (the logged entry's values are
+      already scaled by `servings`, but `SEED_RECIPES` stores per-`baseServings`
+      values) — divide each nutrient by `servings` and set `baseServings: 1`, unless
+      the user specifies a different base.
+    - Build the entry in the exact shape `find-meal-ideas` uses — see
+      [../find-meal-ideas/SKILL.md](../find-meal-ideas/SKILL.md) Workflow 2, step 2 for
+      the object shape and the `seed-<slug>` id convention — and append it to
+      `SEED_RECIPES` in `index.html` with `StrReplace` (before the closing `];`). Note
+      in `instructions` if any numbers were estimated rather than sourced, same
+      convention as existing seed recipes.
+    - This is a personal, non-collaborative repo, so commit and push this directly
+      (`git add index.html && git commit -m "..." && git push`) rather than staging it
+      in `meal-ideas-candidates.md` for review — that staging step is only for the
+      batches `find-meal-ideas` generates, not single items logged in passing. If a
+      push isn't possible in the current environment, just say the entry was logged
+      but not saved to the library.
+    - This only ever *adds* a new library entry — never touch `state.log` (the actual
+      consumption record) as part of this step; that was already written in step 7.
+11. Mention (briefly, not every time) that this will show up in the app next time it
     syncs — automatically if the tab is open and regains focus, or via the Sync button
     otherwise.
 
@@ -101,10 +131,11 @@ wrong date, or just "remove that").
 
 ## Notes
 
-- Never edit `SEED_RECIPES` in `index.html` for this — that's the recipe *library*
-  (handled by the `find-meal-ideas` skill) and lives in git. The Daily Log is
-  per-date actual-consumption data and lives only in the synced state (localStorage +
-  Gist), never in git.
+- The actual log entry (`state.log`) always lives only in the synced state
+  (localStorage + Gist), never in git — logging never touches `index.html` by itself.
+  The *only* time this skill edits `SEED_RECIPES` in git is the opt-in "grow the
+  database" step (Workflow 1, step 10), and only to add a reusable library entry —
+  never to record what was eaten on a given date.
 - All scripts read credentials from `.meal-sync-secrets.json` directly — never pass
   the token as a command-line argument or print it.
 - The Daily Log is intentionally separate from the Day A / Day B planning template —
