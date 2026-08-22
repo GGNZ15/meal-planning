@@ -749,6 +749,22 @@
     <div class="days" id="days"></div>
 
     <section class="panel">
+      <div class="day-head">
+        <div>
+          <h2>Daily log</h2>
+          <p class="panel-sub" style="margin-bottom:0;">Track what you actually ate on a given date — separate from the Day A / Day B plan above, scored against the same targets.</p>
+        </div>
+        <div class="toolbar" style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
+          <input type="date" id="log-date" aria-label="Log date" />
+          <button class="btn btn-ghost" type="button" id="log-today-btn">Today</button>
+          <button class="btn btn-ghost" type="button" id="log-clear-day">Clear day</button>
+        </div>
+      </div>
+      <div class="slots" id="log-slots"></div>
+      <div id="log-progress"></div>
+    </section>
+
+    <section class="panel">
       <div class="recipes-head">
         <div>
           <h2 style="margin:0;">Foods / Recipes</h2>
@@ -783,6 +799,47 @@ Fibre 8g · Sugar 14g · Sodium 180mg"></textarea>
         <button class="btn btn-primary" type="button" id="use-import" disabled>Review &amp; edit</button>
       </div>
     </div>
+  </dialog>
+
+  <dialog id="log-entry-dialog">
+    <form class="dialog-body" id="log-entry-form" method="dialog">
+      <h3>Custom logged item</h3>
+      <p class="panel-sub">For something not in your recipe library — enter the macros for what you actually ate. This is a one-off entry for this date only (it won't be added to your recipe library).</p>
+      <div class="form-grid">
+        <label class="field full">Name
+          <input name="name" required placeholder="e.g. Cafe flat white" />
+        </label>
+        <label class="field">Servings
+          <input name="servings" type="number" min="0.25" step="0.25" value="1" required />
+        </label>
+        <label class="field">Calories (kcal)
+          <input name="calories" type="number" min="0" step="1" value="0" required />
+        </label>
+        <label class="field">Protein (g)
+          <input name="protein" type="number" min="0" step="0.1" value="0" />
+        </label>
+        <label class="field">Carbs (g)
+          <input name="carbs" type="number" min="0" step="0.1" value="0" />
+        </label>
+        <label class="field">Fat (g)
+          <input name="fat" type="number" min="0" step="0.1" value="0" />
+        </label>
+        <label class="field">Fibre (g)
+          <input name="fibre" type="number" min="0" step="0.1" value="0" />
+        </label>
+        <label class="field">Sugar (g)
+          <input name="sugar" type="number" min="0" step="0.1" value="0" />
+        </label>
+        <label class="field">Sodium (mg)
+          <input name="sodium" type="number" min="0" step="1" value="0" />
+        </label>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" type="button" id="cancel-log-entry">Cancel</button>
+        <button class="btn btn-primary" type="submit">Add to log</button>
+      </div>
+      <input type="hidden" name="slotId" value="" />
+    </form>
   </dialog>
 
   <dialog id="recipe-dialog">
@@ -1395,7 +1452,55 @@ Per 100g:
         dayA: emptyDayPlan(),
         dayB: emptyDayPlan(),
       },
+      log: {},
     });
+
+    function emptyLogDay() {
+      return Object.fromEntries(SLOTS.map((s) => [s.id, []]));
+    }
+
+    function makeId() {
+      if (window.crypto?.randomUUID) return crypto.randomUUID();
+      return `id-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    }
+
+    // Local calendar date (not UTC), so "today" matches what the user sees on their clock.
+    function todayStr() {
+      const d = new Date();
+      const local = new Date(d.getTime() - d.getTimezoneOffset() * 60000);
+      return local.toISOString().slice(0, 10);
+    }
+
+    // Log entries snapshot their macros at the time they're logged, so later
+    // edits to a recipe's nutrition don't retroactively rewrite past days.
+    function normalizeLog(raw) {
+      const out = {};
+      if (!raw || typeof raw !== "object") return out;
+      for (const [date, plan] of Object.entries(raw)) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+        const day = emptyLogDay();
+        if (plan && typeof plan === "object") {
+          for (const slot of SLOTS) {
+            const list = Array.isArray(plan[slot.id]) ? plan[slot.id] : [];
+            day[slot.id] = list
+              .filter((e) => e && typeof e === "object")
+              .map((e) => {
+                const entry = {
+                  id: String(e.id || makeId()),
+                  recipeId: e.recipeId ? String(e.recipeId) : null,
+                  name: String(e.name || "Untitled item").slice(0, 200),
+                  servings: Number(e.servings) || 1,
+                  source: e.source === "chat" ? "chat" : "manual",
+                };
+                for (const n of NUTRIENTS) entry[n.key] = Number(e[n.key]) || 0;
+                return entry;
+              });
+          }
+        }
+        out[date] = day;
+      }
+      return out;
+    }
 
     function normalizeDayPlan(plan) {
       const next = emptyDayPlan();
@@ -1456,6 +1561,7 @@ Per 100g:
             dayA: Math.max(0, Number(parsed.shopRepeats?.dayA) || 1),
             dayB: Math.max(0, Number(parsed.shopRepeats?.dayB) || 1),
           },
+          log: normalizeLog(parsed.log),
           updatedAt: parsed.updatedAt || new Date().toISOString(),
         };
       } catch {
@@ -1490,6 +1596,7 @@ Per 100g:
     let state = loadState();
     if (!Array.isArray(state.shopChecked)) state.shopChecked = [];
     if (!state.shopRepeats) state.shopRepeats = { dayA: 1, dayB: 1 };
+    if (!state.log || typeof state.log !== "object") state.log = {};
     if (!state.updatedAt) state.updatedAt = new Date().toISOString();
     saveState({ skipCloud: true, skipTouch: true }); // persist any newly merged seed recipes
     let editingId = null;
@@ -1542,6 +1649,14 @@ Per 100g:
       exportBackup: document.getElementById("export-backup"),
       importBackup: document.getElementById("import-backup"),
       importBackupFile: document.getElementById("import-backup-file"),
+      logDate: document.getElementById("log-date"),
+      logTodayBtn: document.getElementById("log-today-btn"),
+      logClearDay: document.getElementById("log-clear-day"),
+      logSlots: document.getElementById("log-slots"),
+      logProgress: document.getElementById("log-progress"),
+      logEntryDialog: document.getElementById("log-entry-dialog"),
+      logEntryForm: document.getElementById("log-entry-form"),
+      cancelLogEntry: document.getElementById("cancel-log-entry"),
     };
 
     function setSyncStatus(message, tone = "") {
@@ -1634,6 +1749,7 @@ Per 100g:
           dayA: normalizeDayPlan(remote.data.days?.dayA),
           dayB: normalizeDayPlan(remote.data.days?.dayB),
         },
+        log: normalizeLog(remote.data.log),
         updatedAt: remote.updatedAt || remote.data.updatedAt || new Date().toISOString(),
       };
       saveState({ skipCloud: true, skipTouch: true });
@@ -1735,6 +1851,7 @@ Per 100g:
               dayA: normalizeDayPlan(data.days?.dayA),
               dayB: normalizeDayPlan(data.days?.dayB),
             },
+            log: normalizeLog(data.log),
             updatedAt: new Date().toISOString(),
           };
           saveState();
@@ -1766,6 +1883,61 @@ Per 100g:
       if (!day) return null;
       if (!Array.isArray(day[slotId])) day[slotId] = [];
       return day[slotId];
+    }
+
+    // Read-only: returns the stored plan for a date, or a fresh (unstored) empty
+    // one — so simply rendering/viewing a date never creates clutter in state.log.
+    function getLogDayPlan(dateStr) {
+      return state.log[dateStr] || emptyLogDay();
+    }
+
+    function logEntries(dateStr, slotId) {
+      return getLogDayPlan(dateStr)[slotId] || [];
+    }
+
+    function ensureLogDayPlan(dateStr) {
+      if (!state.log[dateStr]) state.log[dateStr] = emptyLogDay();
+      return state.log[dateStr];
+    }
+
+    function addLogEntryFromRecipe(dateStr, slotId, recipeId, servings) {
+      const recipe = recipeById(recipeId);
+      if (!recipe) return false;
+      const scaled = scaleRecipe(recipe, servings);
+      const entry = {
+        id: makeId(),
+        recipeId: recipe.id,
+        name: recipe.name,
+        servings: Number(servings) || 1,
+        source: "manual",
+      };
+      for (const n of NUTRIENTS) entry[n.key] = scaled[n.key];
+      ensureLogDayPlan(dateStr)[slotId].push(entry);
+      return true;
+    }
+
+    function addCustomLogEntry(dateStr, slotId, fields) {
+      const entry = {
+        id: makeId(),
+        recipeId: null,
+        name: String(fields.name || "Custom item").trim() || "Custom item",
+        servings: Number(fields.servings) || 1,
+        source: "manual",
+      };
+      for (const n of NUTRIENTS) entry[n.key] = Number(fields[n.key]) || 0;
+      ensureLogDayPlan(dateStr)[slotId].push(entry);
+      return true;
+    }
+
+    function logDayTotals(dateStr) {
+      const totals = Object.fromEntries(NUTRIENTS.map((n) => [n.key, 0]));
+      const plan = getLogDayPlan(dateStr);
+      for (const slot of SLOTS) {
+        for (const item of plan[slot.id] || []) {
+          for (const n of NUTRIENTS) totals[n.key] += Number(item[n.key]) || 0;
+        }
+      }
+      return totals;
     }
 
     function addRecipeToSlot(dayId, slotId, recipeId, servings) {
@@ -2035,8 +2207,7 @@ Per 100g:
       `).join("");
     }
 
-    function progressHtml(dayId) {
-      const totals = dayTotals(dayId);
+    function progressBlockHtml(totals, heading = "Daily progress") {
       const metrics = NUTRIENTS.map((n) => {
         const target = Number(state.targets[n.key]) || 0;
         const value = totals[n.key];
@@ -2056,7 +2227,7 @@ Per 100g:
 
       return `
         <div class="progress-block">
-          <h3>Daily progress</h3>
+          <h3>${heading}</h3>
           <div class="progress-list">${metrics}</div>
           <div class="day-total">
             <span class="chip">${fmt(totals.calories)} kcal</span>
@@ -2066,6 +2237,10 @@ Per 100g:
           </div>
         </div>
       `;
+    }
+
+    function progressHtml(dayId) {
+      return progressBlockHtml(dayTotals(dayId), "Daily progress");
     }
 
     function slotHtml(dayId, slot) {
@@ -2143,6 +2318,63 @@ Per 100g:
       `).join("");
     }
 
+    function logSlotHtml(dateStr, slot) {
+      const items = logEntries(dateStr, slot.id);
+      const options = state.recipes
+        .map((r) => `<option value="${escapeHtml(String(r.id))}">${escapeHtml(r.name)}</option>`)
+        .join("");
+      const placeholder = items.length ? "Log another food / recipe…" : "Log a food / recipe…";
+
+      const list = items.length
+        ? items.map((item) => `
+            <div class="item">
+              <div>
+                <div class="item-name">${escapeHtml(item.name)}${item.source === "chat" ? ` <span class="item-meta" style="text-transform:none;display:inline;">(via chat)</span>` : ""}</div>
+                <div class="item-meta">${fmt(item.servings, 2)} serving${item.servings === 1 ? "" : "s"} · ${fmt(item.calories)} kcal · P ${fmt(item.protein, 1)} · C ${fmt(item.carbs, 1)} · F ${fmt(item.fat, 1)}</div>
+              </div>
+              <div></div>
+              <button class="icon-btn" type="button" data-log-remove="${dateStr}|${slot.id}|${item.id}" aria-label="Remove">×</button>
+            </div>
+          `).join("")
+        : `<div class="empty">Nothing logged yet.</div>`;
+
+      const kcalTotal = items.reduce((sum, i) => sum + (Number(i.calories) || 0), 0);
+      const countLabel = items.length ? `${items.length} item${items.length === 1 ? "" : "s"} · ` : "";
+
+      return `
+        <article class="slot">
+          <div class="slot-head">
+            <h3>${slot.label}</h3>
+            <div class="slot-kcal">${countLabel}${fmt(kcalTotal)} kcal</div>
+          </div>
+          <div class="slot-items">${list}</div>
+          <div class="add-row">
+            <select data-log-add-select data-slot="${slot.id}" ${state.recipes.length ? "" : "disabled"}>
+              ${state.recipes.length ? `<option value="">${placeholder}</option>${options}` : `<option value="">Add a food / recipe first</option>`}
+            </select>
+            <input data-log-add-servings data-slot="${slot.id}" type="number" min="0.25" step="0.25" value="1" aria-label="Servings to log" title="Servings" />
+            <button class="btn btn-primary" type="button" data-log-add data-slot="${slot.id}">Add</button>
+          </div>
+          <button class="btn btn-ghost" type="button" data-log-custom="${slot.id}" style="margin-top:0.5rem; width:100%;">+ Custom item (not in library)</button>
+        </article>
+      `;
+    }
+
+    function currentLogDate() {
+      return els.logDate.value || todayStr();
+    }
+
+    function renderLog() {
+      const dateStr = currentLogDate();
+      els.logSlots.innerHTML = SLOTS.map((slot) => logSlotHtml(dateStr, slot)).join("");
+      els.logProgress.innerHTML = progressBlockHtml(logDayTotals(dateStr), "Logged so far");
+    }
+
+    function parseLogKey(value) {
+      const [date, slotId, id] = String(value || "").split("|");
+      return { date, slotId, id };
+    }
+
     function renderRecipes() {
       if (!state.recipes.length) {
         els.recipeList.innerHTML = `<div class="empty">No foods / recipes yet. Add one to get started.</div>`;
@@ -2187,6 +2419,7 @@ Per 100g:
     function render() {
       renderTargets();
       renderDays();
+      renderLog();
       renderRecipes();
     }
 
@@ -2559,6 +2792,93 @@ Per 100g:
       state.targets[input.dataset.target] = Number(input.value) || 0;
       saveState();
       renderDays();
+      renderLog();
+    });
+
+    els.logDate.value = todayStr();
+    els.logDate.addEventListener("change", () => {
+      if (!els.logDate.value) els.logDate.value = todayStr();
+      renderLog();
+    });
+    els.logTodayBtn.addEventListener("click", () => {
+      els.logDate.value = todayStr();
+      renderLog();
+    });
+    els.logClearDay.addEventListener("click", () => {
+      const dateStr = currentLogDate();
+      if (!Object.values(getLogDayPlan(dateStr)).some((l) => l.length)) return;
+      if (!confirm(`Clear all logged items for ${dateStr}?`)) return;
+      state.log[dateStr] = emptyLogDay();
+      saveState();
+      renderLog();
+    });
+
+    let logCustomSlotId = null;
+
+    els.logSlots.addEventListener("click", (e) => {
+      const addBtn = e.target.closest("[data-log-add]");
+      if (addBtn) {
+        const row = addBtn.closest(".add-row");
+        const slotId = addBtn.dataset.slot;
+        const select = row?.querySelector("[data-log-add-select]");
+        const servingsInput = row?.querySelector("[data-log-add-servings]");
+        const recipeId = select?.value;
+        const servings = Number(servingsInput?.value) || 1;
+        if (!recipeId) return;
+        if (!addLogEntryFromRecipe(currentLogDate(), slotId, recipeId, servings)) return;
+        saveState();
+        renderLog();
+        return;
+      }
+
+      const customBtn = e.target.closest("[data-log-custom]");
+      if (customBtn) {
+        logCustomSlotId = customBtn.dataset.logCustom;
+        els.logEntryForm.reset();
+        els.logEntryForm.slotId.value = logCustomSlotId;
+        els.logEntryDialog.showModal();
+        els.logEntryForm.name.focus();
+        return;
+      }
+
+      const removeBtn = e.target.closest("[data-log-remove]");
+      if (removeBtn) {
+        const { date, slotId, id } = parseLogKey(removeBtn.dataset.logRemove);
+        const items = logEntries(date, slotId);
+        const idx = items.findIndex((i) => i.id === id);
+        if (idx < 0) return;
+        items.splice(idx, 1);
+        saveState();
+        renderLog();
+      }
+    });
+
+    els.logSlots.addEventListener("change", (e) => {
+      const select = e.target.closest("[data-log-add-select]");
+      if (!select) return;
+      const recipeId = select.value;
+      if (!recipeId) return;
+      const row = select.closest(".add-row");
+      const servingsInput = row?.querySelector("[data-log-add-servings]");
+      const servings = Number(servingsInput?.value) || 1;
+      if (!addLogEntryFromRecipe(currentLogDate(), select.dataset.slot, recipeId, servings)) return;
+      saveState();
+      renderLog();
+    });
+
+    els.cancelLogEntry.addEventListener("click", () => els.logEntryDialog.close());
+
+    els.logEntryForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const fd = new FormData(els.logEntryForm);
+      const fields = { name: fd.get("name"), servings: fd.get("servings") };
+      for (const n of NUTRIENTS) fields[n.key] = fd.get(n.key);
+      const slotId = fd.get("slotId") || logCustomSlotId;
+      if (!slotId || !String(fields.name || "").trim()) return;
+      addCustomLogEntry(currentLogDate(), slotId, fields);
+      saveState();
+      els.logEntryDialog.close();
+      renderLog();
     });
 
     els.days.addEventListener("click", (e) => {
