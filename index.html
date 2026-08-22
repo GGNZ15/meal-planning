@@ -150,6 +150,43 @@
 
     .day-head h2 { margin: 0; }
 
+    details.panel > summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    details.panel > summary::-webkit-details-marker { display: none; }
+
+    details.panel > summary h2 { margin: 0; }
+
+    details.panel > summary::after {
+      content: "";
+      width: 9px;
+      height: 9px;
+      flex-shrink: 0;
+      border-right: 2px solid var(--muted);
+      border-bottom: 2px solid var(--muted);
+      transform: rotate(45deg);
+      transition: transform 0.2s ease;
+      margin-left: 0.5rem;
+    }
+
+    details.panel[open] > summary::after { transform: rotate(-135deg); }
+
+    details.panel > summary:hover h2 { color: var(--accent); }
+
+    details.panel[open] > summary { margin-bottom: 0.9rem; }
+
+    .btn.btn-ghost[aria-pressed="true"] {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
     label.field {
       display: grid;
       gap: 0.3rem;
@@ -740,43 +777,42 @@
       </div>
     </header>
 
-    <section class="panel targets-panel">
-      <h2>Daily targets</h2>
-      <p class="panel-sub">These goals apply to both days.</p>
-      <div class="targets" id="targets"></div>
-    </section>
-
-    <div class="days" id="days"></div>
-
     <section class="panel">
       <div class="day-head">
         <div>
           <h2>Daily log</h2>
-          <p class="panel-sub" style="margin-bottom:0;">Track what you actually ate on a given date — separate from the Day A / Day B plan above, scored against the same targets.</p>
+          <p class="panel-sub" style="margin-bottom:0;">What you've actually eaten — logged via chat, or add it below.</p>
         </div>
         <div class="toolbar" style="display:flex; gap:0.5rem; align-items:center; flex-wrap:wrap;">
           <input type="date" id="log-date" aria-label="Log date" />
           <button class="btn btn-ghost" type="button" id="log-today-btn">Today</button>
-          <button class="btn btn-ghost" type="button" id="log-clear-day">Clear day</button>
+          <button class="btn btn-ghost" type="button" id="log-edit-toggle" aria-pressed="false">Edit</button>
+          <button class="btn btn-ghost" type="button" id="log-clear-day" hidden>Clear day</button>
         </div>
       </div>
-      <div class="slots" id="log-slots"></div>
       <div id="log-progress"></div>
+      <div class="slots" id="log-slots"></div>
     </section>
 
-    <section class="panel">
+    <div class="days" id="days"></div>
+
+    <details class="panel targets-panel">
+      <summary><h2>Daily targets</h2></summary>
+      <p class="panel-sub">These goals apply to both days.</p>
+      <div class="targets" id="targets"></div>
+    </details>
+
+    <details class="panel">
+      <summary><h2>Foods / Recipes</h2></summary>
       <div class="recipes-head">
-        <div>
-          <h2 style="margin:0;">Foods / Recipes</h2>
-          <p class="panel-sub" style="margin:0.25rem 0 0;">Shared across both days. Saved in this browser.</p>
-        </div>
+        <p class="panel-sub" style="margin:0;">Shared across both days. Saved in this browser.</p>
         <div class="recipes-actions">
           <button class="btn btn-ghost" type="button" id="import-recipe">Import from text</button>
           <button class="btn btn-primary" type="button" id="add-recipe">Add food / recipe</button>
         </div>
       </div>
       <div class="recipe-list" id="recipe-list"></div>
-    </section>
+    </details>
   </div>
 
   <dialog id="import-dialog">
@@ -985,6 +1021,12 @@ Fibre 8g · Sugar 14g · Sodium 180mg"></textarea>
       { key: "sugar", label: "Sugar", unit: "g", step: 1 },
       { key: "sodium", label: "Sodium", unit: "mg", step: 10 },
     ];
+
+    // UI-only state (not persisted) — resets to these defaults on every page load.
+    const uiState = {
+      dayOpen: Object.fromEntries(DAYS.map((d) => [d.id, false])),
+      logEditMode: false,
+    };
 
     function emptyDayPlan() {
       return Object.fromEntries(SLOTS.map((s) => [s.id, []]));
@@ -1651,6 +1693,7 @@ Per 100g:
       importBackupFile: document.getElementById("import-backup-file"),
       logDate: document.getElementById("log-date"),
       logTodayBtn: document.getElementById("log-today-btn"),
+      logEditToggle: document.getElementById("log-edit-toggle"),
       logClearDay: document.getElementById("log-clear-day"),
       logSlots: document.getElementById("log-slots"),
       logProgress: document.getElementById("log-progress"),
@@ -2300,12 +2343,10 @@ Per 100g:
 
     function renderDays() {
       els.days.innerHTML = DAYS.map((day) => `
-        <section class="panel day-panel" data-day="${day.id}">
+        <details class="panel day-panel" data-day="${day.id}" ${uiState.dayOpen[day.id] ? "open" : ""}>
+          <summary><h2>${day.label}</h2></summary>
           <div class="day-head">
-            <div>
-              <h2>${day.label}</h2>
-              <p class="panel-sub" style="margin-bottom:0;">Each slot can hold multiple recipes. Servings scale the nutrition.</p>
-            </div>
+            <p class="panel-sub" style="margin-bottom:0;">Each slot can hold multiple recipes. Servings scale the nutrition.</p>
             <div class="toolbar">
               <button class="btn btn-ghost" type="button" data-clear-day="${day.id}">Clear</button>
             </div>
@@ -2314,11 +2355,16 @@ Per 100g:
             ${SLOTS.map((slot) => slotHtml(day.id, slot)).join("")}
           </div>
           ${progressHtml(day.id)}
-        </section>
+        </details>
       `).join("");
+      els.days.querySelectorAll("details[data-day]").forEach((el) => {
+        el.addEventListener("toggle", () => {
+          uiState.dayOpen[el.dataset.day] = el.open;
+        });
+      });
     }
 
-    function logSlotHtml(dateStr, slot) {
+    function logSlotHtml(dateStr, slot, editMode) {
       const items = logEntries(dateStr, slot.id);
       const options = state.recipes
         .map((r) => `<option value="${escapeHtml(String(r.id))}">${escapeHtml(r.name)}</option>`)
@@ -2333,7 +2379,7 @@ Per 100g:
                 <div class="item-meta">${fmt(item.servings, 2)} serving${item.servings === 1 ? "" : "s"} · ${fmt(item.calories)} kcal · P ${fmt(item.protein, 1)} · C ${fmt(item.carbs, 1)} · F ${fmt(item.fat, 1)}</div>
               </div>
               <div></div>
-              <button class="icon-btn" type="button" data-log-remove="${dateStr}|${slot.id}|${item.id}" aria-label="Remove">×</button>
+              ${editMode ? `<button class="icon-btn" type="button" data-log-remove="${dateStr}|${slot.id}|${item.id}" aria-label="Remove">×</button>` : ""}
             </div>
           `).join("")
         : `<div class="empty">Nothing logged yet.</div>`;
@@ -2341,13 +2387,7 @@ Per 100g:
       const kcalTotal = items.reduce((sum, i) => sum + (Number(i.calories) || 0), 0);
       const countLabel = items.length ? `${items.length} item${items.length === 1 ? "" : "s"} · ` : "";
 
-      return `
-        <article class="slot">
-          <div class="slot-head">
-            <h3>${slot.label}</h3>
-            <div class="slot-kcal">${countLabel}${fmt(kcalTotal)} kcal</div>
-          </div>
-          <div class="slot-items">${list}</div>
+      const editControls = editMode ? `
           <div class="add-row">
             <select data-log-add-select data-slot="${slot.id}" ${state.recipes.length ? "" : "disabled"}>
               ${state.recipes.length ? `<option value="">${placeholder}</option>${options}` : `<option value="">Add a food / recipe first</option>`}
@@ -2356,6 +2396,16 @@ Per 100g:
             <button class="btn btn-primary" type="button" data-log-add data-slot="${slot.id}">Add</button>
           </div>
           <button class="btn btn-ghost" type="button" data-log-custom="${slot.id}" style="margin-top:0.5rem; width:100%;">+ Custom item (not in library)</button>
+      ` : "";
+
+      return `
+        <article class="slot">
+          <div class="slot-head">
+            <h3>${slot.label}</h3>
+            <div class="slot-kcal">${countLabel}${fmt(kcalTotal)} kcal</div>
+          </div>
+          <div class="slot-items">${list}</div>
+          ${editControls}
         </article>
       `;
     }
@@ -2366,8 +2416,17 @@ Per 100g:
 
     function renderLog() {
       const dateStr = currentLogDate();
-      els.logSlots.innerHTML = SLOTS.map((slot) => logSlotHtml(dateStr, slot)).join("");
+      const editMode = uiState.logEditMode;
+      const visibleSlots = editMode ? SLOTS : SLOTS.filter((slot) => logEntries(dateStr, slot.id).length > 0);
+
+      els.logSlots.innerHTML = visibleSlots.length
+        ? visibleSlots.map((slot) => logSlotHtml(dateStr, slot, editMode)).join("")
+        : `<div class="empty">Nothing logged yet for this day.</div>`;
       els.logProgress.innerHTML = progressBlockHtml(logDayTotals(dateStr), "Logged so far");
+
+      els.logEditToggle.textContent = editMode ? "Done" : "Edit";
+      els.logEditToggle.setAttribute("aria-pressed", String(editMode));
+      els.logClearDay.hidden = !editMode;
     }
 
     function parseLogKey(value) {
@@ -2802,6 +2861,10 @@ Per 100g:
     });
     els.logTodayBtn.addEventListener("click", () => {
       els.logDate.value = todayStr();
+      renderLog();
+    });
+    els.logEditToggle.addEventListener("click", () => {
+      uiState.logEditMode = !uiState.logEditMode;
       renderLog();
     });
     els.logClearDay.addEventListener("click", () => {
