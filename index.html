@@ -642,6 +642,13 @@
       gap: 0.5rem;
     }
 
+    .version-stamp {
+      margin: 0.4rem 0 0;
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-align: right;
+    }
+
     .sync-status {
       margin: 0.35rem 0 0;
       font-size: 0.85rem;
@@ -775,6 +782,7 @@
           <button class="btn btn-primary" type="button" id="shopping-list-btn">Shopping list</button>
         </div>
       </div>
+      <p class="version-stamp" id="version-stamp"></p>
     </header>
 
     <section class="panel">
@@ -1649,6 +1657,7 @@ Per 100g:
     let syncing = false;
 
     const els = {
+      versionStamp: document.getElementById("version-stamp"),
       days: document.getElementById("days"),
       targets: document.getElementById("targets"),
       recipeList: document.getElementById("recipe-list"),
@@ -1771,10 +1780,19 @@ Per 100g:
       return parsed?.data ? parsed : { updatedAt: parsed?.updatedAt, data: parsed };
     }
 
+    // Date.parse(0) treats the fallback 0 as the string "0" (not epoch ms) and
+    // returns NaN — so a device with no local updatedAt yet must not silently
+    // treat itself as "newer" than the cloud. This coerces missing/invalid
+    // timestamps to 0 (oldest possible) so comparisons stay meaningful.
+    function parseTimestamp(value) {
+      const t = value ? Date.parse(value) : NaN;
+      return Number.isFinite(t) ? t : 0;
+    }
+
     function applyRemoteState(remote) {
       if (!remote?.data) return false;
-      const remoteAt = Date.parse(remote.updatedAt || remote.data.updatedAt || 0);
-      const localAt = Date.parse(state.updatedAt || 0);
+      const remoteAt = parseTimestamp(remote.updatedAt || remote.data.updatedAt);
+      const localAt = parseTimestamp(state.updatedAt);
       if (remoteAt && localAt && remoteAt <= localAt) return false;
       const base = defaultState();
       state = {
@@ -1823,9 +1841,12 @@ Per 100g:
           setSyncStatus(`Synced. Gist ID: ${syncSettings.gistId}`, "ok");
         } else {
           const remote = await pullFromCloud();
-          const remoteAt = Date.parse(remote?.updatedAt || remote?.data?.updatedAt || 0);
-          const localAt = Date.parse(state.updatedAt || 0);
-          if (remote && remoteAt > localAt) {
+          const remoteAt = parseTimestamp(remote?.updatedAt || remote?.data?.updatedAt);
+          const localAt = parseTimestamp(state.updatedAt);
+          // Favor the cloud copy on ties/unknowns (e.g. this device has never
+          // saved locally) so a fresh device pulls existing data instead of
+          // clobbering it with a blank/default state.
+          if (remote && remoteAt >= localAt) {
             const changed = applyRemoteState(remote);
             if (changed) render();
             setSyncStatus("Pulled latest plan from the cloud.", "ok");
@@ -3042,7 +3063,22 @@ Per 100g:
 
     els.closeInstructions.addEventListener("click", () => els.instructionsDialog.close());
 
+    function renderVersionStamp() {
+      if (!els.versionStamp) return;
+      // document.lastModified reflects the server's Last-Modified header for
+      // this file, so it changes whenever a new commit is deployed — a
+      // zero-maintenance way to confirm you're looking at the latest version
+      // (and to notice if your browser is serving a stale cached copy).
+      const raw = document.lastModified;
+      const parsed = raw ? new Date(raw) : null;
+      const label = parsed && !Number.isNaN(parsed.getTime())
+        ? parsed.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" })
+        : raw;
+      els.versionStamp.textContent = label ? `Page updated ${label}` : "";
+    }
+
     render();
+    renderVersionStamp();
     if (syncSettings.token && syncSettings.gistId) {
       syncNow().catch(() => {});
     }
