@@ -32,9 +32,11 @@ uses, so a logged item shows up next time the app syncs — no need to open a br
 
 ## Workflow 1: Log an entry
 
-1. **Determine the date.** Default to today (use the conversation's current date/time
-   context). Resolve relative references ("yesterday", "Friday") against that. Format
-   as `YYYY-MM-DD`.
+1. **Determine the date.** Default to **today in Pacific/Auckland (NZ)** — not UTC.
+   Cloud agents often run in UTC, so always convert: e.g. 23 Aug 11pm UTC is already
+   **24 Aug in NZ**. Resolve relative references ("yesterday", "Friday") against NZ
+   local date. Format as `YYYY-MM-DD`. When in doubt, ask the user which NZ date they
+   mean.
 2. **Determine the slot.** Map the user's wording to one of: `breakfast`,
    `morningSnack`, `lunch`, `afternoonSnack`, `dinner`, `dessert`. If they just say
    "snack" with no time-of-day context, ask which one (or infer from time of day if
