@@ -18,11 +18,24 @@ keep it that way.
 
 ## This is the canonical meal planner
 
-`closet-mixer/public/meals.html` is a stale fork of this file, taken 2026-07-28.
-Five commits of feature work landed here on 2026-08-22 and never reached it, so
-this copy is roughly a month ahead.
+`index.html` is the single source of truth. `closet-mixer/public/meals.html` is
+generated from it — make every planner change here, then run:
 
-Make all meal planner changes here. When `meals.html` is regenerated from this
-file it needs its bundle-import adaptation re-applied — about 55 lines that seed
-an empty planner from `/meal-planner-backup.json`. See `closet-mixer/AGENTS.md`
-for why that fork exists (same-origin `localStorage` sharing).
+```bash
+./scripts/sync-meal-planner.sh
+```
+
+Forgetting this is how the two drifted apart before (a fork taken 2026-07-28
+missed five commits of features through 2026-08-22). `--check` will tell you if
+the generated copy is stale.
+
+### The embedder hook
+
+Near the end of the script, `runBootstrapHook()` awaits an optional
+`window.__mealPlannerBootstrap` before the first `render()`. Standalone, it does
+nothing. closet-mixer defines it to seed an empty planner from a bundled backup.
+
+If you change `defaultState`, `normalizeDayPlan`, `saveState`, or the shape of
+`state`, check `closet-mixer/public/meal-bundle-import.js` — it receives those
+through the hook's context object and will break silently otherwise, since the
+hook swallows its own errors by design.

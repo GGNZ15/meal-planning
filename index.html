@@ -3141,11 +3141,36 @@ everything by 4: 500g pork mince, 400g salad mix, 140g rice noodles, 20g olive o
       els.versionStamp.textContent = label ? `Page updated ${label}` : "";
     }
 
-    render();
-    renderVersionStamp();
-    if (syncSettings.token && syncSettings.gistId) {
-      syncNow().catch(() => {});
+    // Optional hook for hosts that embed this page. closet-mixer serves a copy
+    // from its own origin so the two share localStorage, and uses this to seed
+    // an empty planner before first render. Resolve true if state changed.
+    async function runBootstrapHook() {
+      const hook = window.__mealPlannerBootstrap;
+      if (typeof hook !== "function") return false;
+      try {
+        const changed = await hook({
+          getState: () => state,
+          setState: (next) => { state = next; },
+          defaultState,
+          normalizeDayPlan,
+          saveState,
+        });
+        return changed === true;
+      } catch {
+        return false;
+      }
     }
+
+    runBootstrapHook().then((changed) => {
+      render();
+      renderVersionStamp();
+      if (changed) {
+        setSyncStatus("Loaded your saved meal plan onto this site.", "ok");
+      }
+      if (syncSettings.token && syncSettings.gistId) {
+        syncNow().catch(() => {});
+      }
+    });
   </script>
 </body>
 </html>
