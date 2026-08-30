@@ -16,9 +16,13 @@ State syncs between phone and laptop via a GitHub Gist. Credentials live in
 `.meal-sync-secrets.json`, which is gitignored and has never been committed —
 keep it that way.
 
-## Known duplication
+## This is the canonical meal planner
 
-`closet-mixer/public/meals.html` is an older, drifted copy of this app, and
-closet-mixer reads meal state from the same browser storage keys. Changes here
-may need mirroring there, or the two should be reconciled into one canonical
-copy. See `closet-mixer/AGENTS.md`.
+`closet-mixer/public/meals.html` is a stale fork of this file, taken 2026-07-28.
+Five commits of feature work landed here on 2026-08-22 and never reached it, so
+this copy is roughly a month ahead.
+
+Make all meal planner changes here. When `meals.html` is regenerated from this
+file it needs its bundle-import adaptation re-applied — about 55 lines that seed
+an empty planner from `/meal-planner-backup.json`. See `closet-mixer/AGENTS.md`
+for why that fork exists (same-origin `localStorage` sharing).
